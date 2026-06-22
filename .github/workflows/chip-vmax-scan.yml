@@ -1,4 +1,4 @@
-name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V17.2 SIÊU QUÉT"
+name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V17.3 SIÊU QUÉT"
 
 on:
   workflow_dispatch:
@@ -52,12 +52,12 @@ jobs:
     timeout-minutes: 420
     
     steps:
-      - name: 🧠 KHỞI TẠO CHIP V17.2
+      - name: 🧠 KHỞI TẠO CHIP V17.3
         run: |
           set -e
           echo "╔══════════════════════════════════════════════════════════════════════════════╗"
           echo "║                                                                            ║"
-          echo "║     🧠 CHIP V17.2 - SIÊU QUÉT TOÀN DIỆN - TỐI ƯU NHẤT                   ║"
+          echo "║     🧠 CHIP V17.3 - SIÊU QUÉT TOÀN DIỆN - TỐI ƯU NHẤT                   ║"
           echo "║                                                                            ║"
           echo "╚══════════════════════════════════════════════════════════════════════════════╝"
           echo ""
@@ -127,7 +127,7 @@ jobs:
         id: get_targets
         run: |
           set -e
-          echo "🌌 CHIP V17.2 ĐANG TÌM WEB..."
+          echo "🌌 CHIP V17.3 ĐANG TÌM WEB..."
           
           cat > targets.txt << 'EOF'
           # === WEB TEST CÓ LỖI CỐ Ý ===
@@ -198,7 +198,7 @@ jobs:
         timeout-minutes: 360
         run: |
           set -e
-          echo "⏰ CHIP V17.2 BẮT ĐẦU: $(date)"
+          echo "⏰ CHIP V17.3 BẮT ĐẦU: $(date)"
           echo "🎯 MỤC TIÊU: ${{ env.target_count }}"
           
           export PATH=$PATH:/usr/local/go/bin
@@ -224,7 +224,7 @@ jobs:
             SEVERITY="${{ github.event.inputs.severity_level }}"
           fi
           
-          echo "⚙️ CHIP V17.2 - QUÉT TOÀN DIỆN:"
+          echo "⚙️ CHIP V17.3 - QUÉT TOÀN DIỆN:"
           echo "⚙️ CONCURRENCY: $CONCURRENCY"
           echo "⚙️ BULK_SIZE: $BULK_SIZE"
           echo "⚙️ RATE_LIMIT: $RATE_LIMIT"
@@ -244,7 +244,7 @@ jobs:
             -silent -no-color 2>&1 | tee scan.log
           
           echo "=================================================="
-          echo "📊 KẾT QUẢ QUÉT CHIP V17.2:"
+          echo "📊 KẾT QUẢ QUÉT CHIP V17.3:"
           echo "=================================================="
           
           if [ -f results.txt ]; then
@@ -276,11 +276,11 @@ jobs:
               echo "Không tìm thấy lỗ hổng nào" > results.txt
           fi
 
-      - name: 📄 BÁO CÁO HTML + TEXT
+      - name: 📄 BÁO CÁO TEXT + HTML
         if: always()
         run: |
           set -e
-          echo "🧠 CHIP V17.2 ĐANG TẠO BÁO CÁO..."
+          echo "🧠 CHIP V17.3 ĐANG TẠO BÁO CÁO..."
           
           TOTAL=$(jq -s 'length' results.json 2>/dev/null || echo 0)
           CRITICAL=$(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)
@@ -294,46 +294,46 @@ jobs:
           RISK_SCORE=$((CRITICAL * 10 + HIGH * 5 + MEDIUM * 2))
           
           if [ $RISK_SCORE -gt 80 ]; then
-              RISK_LEVEL="🔴 CỰC KỲ NGUY HIỂM"
+              RISK_LEVEL="CỰC KỲ NGUY HIỂM"
           elif [ $RISK_SCORE -gt 50 ]; then
-              RISK_LEVEL="🟠 RẤT NGUY HIỂM"
+              RISK_LEVEL="RẤT NGUY HIỂM"
           elif [ $RISK_SCORE -gt 25 ]; then
-              RISK_LEVEL="🟡 NGUY HIỂM"
+              RISK_LEVEL="NGUY HIỂM"
           elif [ $RISK_SCORE -gt 10 ]; then
-              RISK_LEVEL="🟢 THẤP"
+              RISK_LEVEL="THẤP"
           else
-              RISK_LEVEL="⚪ RẤT THẤP"
+              RISK_LEVEL="RẤT THẤP"
           fi
           
           # === BÁO CÁO TEXT ===
-          cat > CHIP_V17_REPORT.txt << EOF
+          cat > CHIP_V17_REPORT.txt << 'EOF'
           ╔══════════════════════════════════════════════════════════════════════════════╗
-          ║       🧠 CHIP V17.2 - SIÊU QUÉT TOÀN DIỆN - BÁO CÁO                       ║
+          ║       🧠 CHIP V17.3 - SIÊU QUÉT TOÀN DIỆN - BÁO CÁO                       ║
           ╚══════════════════════════════════════════════════════════════════════════════╝
           
-          📅 $(date '+%Y-%m-%d %H:%M:%S') | 🔄 #${{ github.run_number }} | 🎯 $TARGET_COUNT web
-          
-          ════════════════════════════════════════════════════════════════════════════════
-          📊 KẾT QUẢ TỔNG QUAN
-          ════════════════════════════════════════════════════════════════════════════════
-          🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi)
-          ⚡ HIGH: $HIGH          (💰 \$1,000+/lỗi)
-          🟡 MEDIUM: $MEDIUM      (💰 \$200+/lỗi)
-          🟢 LOW: $LOW            (💰 \$50+/lỗi)
-          ℹ️ INFO: $INFO          (💰 Có giá trị tham khảo)
-          📦 TỔNG CỘNG: $TOTAL
-          
-          ════════════════════════════════════════════════════════════════════════════════
-          🤖 PHÂN TÍCH RỦI RO
-          ════════════════════════════════════════════════════════════════════════════════
-          📊 RISK SCORE: $RISK_SCORE
-          ⚠️ RISK LEVEL: $RISK_LEVEL
-          💰 ƯỚC TÍNH BOUNTY: \$ $(printf "%'d" $ESTIMATED_BOUNTY)
-          
-          ════════════════════════════════════════════════════════════════════════════════
-          🔥🔥🔥 LỖI CRITICAL
-          ════════════════════════════════════════════════════════════════════════════════
           EOF
+          echo "📅 $(date '+%Y-%m-%d %H:%M:%S') | 🔄 #${{ github.run_number }} | 🎯 $TARGET_COUNT web" >> CHIP_V17_REPORT.txt
+          echo "" >> CHIP_V17_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V17_REPORT.txt
+          echo "📊 KẾT QUẢ TỔNG QUAN" >> CHIP_V17_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V17_REPORT.txt
+          echo "🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi)" >> CHIP_V17_REPORT.txt
+          echo "⚡ HIGH: $HIGH          (💰 \$1,000+/lỗi)" >> CHIP_V17_REPORT.txt
+          echo "🟡 MEDIUM: $MEDIUM      (💰 \$200+/lỗi)" >> CHIP_V17_REPORT.txt
+          echo "🟢 LOW: $LOW            (💰 \$50+/lỗi)" >> CHIP_V17_REPORT.txt
+          echo "ℹ️ INFO: $INFO          (💰 Có giá trị tham khảo)" >> CHIP_V17_REPORT.txt
+          echo "📦 TỔNG CỘNG: $TOTAL" >> CHIP_V17_REPORT.txt
+          echo "" >> CHIP_V17_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V17_REPORT.txt
+          echo "🤖 PHÂN TÍCH RỦI RO" >> CHIP_V17_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V17_REPORT.txt
+          echo "📊 RISK SCORE: $RISK_SCORE" >> CHIP_V17_REPORT.txt
+          echo "⚠️ RISK LEVEL: $RISK_LEVEL" >> CHIP_V17_REPORT.txt
+          echo "💰 ƯỚC TÍNH BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)" >> CHIP_V17_REPORT.txt
+          echo "" >> CHIP_V17_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V17_REPORT.txt
+          echo "🔥🔥🔥 LỖI CRITICAL" >> CHIP_V17_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V17_REPORT.txt
           
           if [ $CRITICAL -gt 0 ]; then
               jq -r 'select(.info.severity=="critical") | "📌 " + .info.name + " → " + .matched-at + " | CVE: " + (.info.cve_id // "N/A")' results.json 2>/dev/null >> CHIP_V17_REPORT.txt
@@ -360,60 +360,48 @@ jobs:
           
           echo "" >> CHIP_V17_REPORT.txt
           echo "╔══════════════════════════════════════════════════════════════════════════════╗" >> CHIP_V17_REPORT.txt
-          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V17.2                                   ║" >> CHIP_V17_REPORT.txt
-          echo "║  💰 BOUNTY: \$ $(printf "%'d" $ESTIMATED_BOUNTY)  |  ⚠️ RISK: $RISK_LEVEL  ║" >> CHIP_V17_REPORT.txt
+          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V17.3                                   ║" >> CHIP_V17_REPORT.txt
+          echo "║  💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)  |  ⚠️ RISK: $RISK_LEVEL  ║" >> CHIP_V17_REPORT.txt
           echo "╚══════════════════════════════════════════════════════════════════════════════╝" >> CHIP_V17_REPORT.txt
           
-          # === BÁO CÁO HTML ĐƠN GIẢN ===
-          cat > report.html << EOF
-          <!DOCTYPE html>
-          <html>
-          <head>
-          <meta charset="UTF-8">
-          <title>CHIP V17.2 REPORT</title>
-          <style>
+          # === BÁO CÁO HTML ĐƠN GIẢN (Không dùng Heredoc) ===
+          echo '<!DOCTYPE html>' > report.html
+          echo '<html><head><meta charset="UTF-8"><title>CHIP V17.3 REPORT</title>' >> report.html
+          echo '<style>
           body{font-family:Arial;background:#0a0a2e;color:#fff;padding:20px}
           .container{max-width:1200px;margin:0 auto;background:rgba(255,255,255,0.05);border-radius:20px;padding:30px}
           h1{text-align:center;color:#ffd700}
           .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:15px;margin:20px 0}
           .card{background:rgba(255,255,255,0.05);border-radius:10px;padding:15px;text-align:center}
           .num{font-size:2.5em;font-weight:bold;display:block}
-          .critical .num{color:#ff4444}
-          .high .num{color:#ff8800}
-          .medium .num{color:#ffcc00}
-          .low .num{color:#44ff88}
-          .info .num{color:#44aaff}
-          .total .num{color:#fff}
+          .critical .num{color:#ff4444} .high .num{color:#ff8800}
+          .medium .num{color:#ffcc00} .low .num{color:#44ff88}
+          .info .num{color:#44aaff} .total .num{color:#fff}
           .vuln{background:rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin:5px 0;border-left:4px solid #666}
-          .vuln.critical{border-left-color:#ff4444}
-          .vuln.high{border-left-color:#ff8800}
+          .vuln.critical{border-left-color:#ff4444} .vuln.high{border-left-color:#ff8800}
           .vuln.medium{border-left-color:#ffcc00}
           .targets{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
           .target{background:rgba(255,255,255,0.05);padding:8px;border-radius:5px;font-size:0.9em}
           .footer{text-align:center;color:#666;margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05)}
-          </style>
-          </head>
-          <body>
-          <div class="container">
-          <h1>🧠 CHIP V17.2 - SIÊU QUÉT</h1>
-          <p style="text-align:center;color:#aaa;">Báo cáo quét bảo mật - $(date '+%Y-%m-%d %H:%M:%S')</p>
-          <p style="text-align:center;color:#888;">Lần quét #${{ github.run_number }} | Số web: $TARGET_COUNT</p>
+          </style></head><body><div class="container">' >> report.html
           
-          <div class="stats">
-          <div class="card critical"><span class="num">$CRITICAL</span>🔥 CRITICAL</div>
-          <div class="card high"><span class="num">$HIGH</span>⚡ HIGH</div>
-          <div class="card medium"><span class="num">$MEDIUM</span>🟡 MEDIUM</div>
-          <div class="card low"><span class="num">$LOW</span>🟢 LOW</div>
-          <div class="card info"><span class="num">$INFO</span>ℹ️ INFO</div>
-          <div class="card total"><span class="num">$TOTAL</span>📦 TỔNG</div>
-          </div>
+          echo '<h1>🧠 CHIP V17.3 - SIÊU QUÉT</h1>' >> report.html
+          echo '<p style="text-align:center;color:#aaa;">Báo cáo quét bảo mật - '"$(date '+%Y-%m-%d %H:%M:%S')"'</p>' >> report.html
+          echo '<p style="text-align:center;color:#888;">Lần quét #${{ github.run_number }} | Số web: '"$TARGET_COUNT"'</p>' >> report.html
           
-          <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:15px;margin:15px 0;text-align:center">
-          <p>💰 Ước tính Bounty: <strong style="color:#ffd700">$$(printf "%'d" $ESTIMATED_BOUNTY)</strong> | ⚠️ Risk Level: <strong style="color:#ff6b6b">$RISK_LEVEL</strong></p>
-          </div>
-          EOF
+          echo '<div class="stats">' >> report.html
+          echo '<div class="card critical"><span class="num">'"$CRITICAL"'</span>🔥 CRITICAL</div>' >> report.html
+          echo '<div class="card high"><span class="num">'"$HIGH"'</span>⚡ HIGH</div>' >> report.html
+          echo '<div class="card medium"><span class="num">'"$MEDIUM"'</span>🟡 MEDIUM</div>' >> report.html
+          echo '<div class="card low"><span class="num">'"$LOW"'</span>🟢 LOW</div>' >> report.html
+          echo '<div class="card info"><span class="num">'"$INFO"'</span>ℹ️ INFO</div>' >> report.html
+          echo '<div class="card total"><span class="num">'"$TOTAL"'</span>📦 TỔNG</div>' >> report.html
+          echo '</div>' >> report.html
           
-          # Thêm lỗi
+          echo '<div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:15px;margin:15px 0;text-align:center">' >> report.html
+          echo '<p>💰 Ước tính Bounty: <strong style="color:#ffd700">$'"$(printf "%'d" $ESTIMATED_BOUNTY)"'</strong> | ⚠️ Risk Level: <strong style="color:#ff6b6b">'"$RISK_LEVEL"'</strong></p>' >> report.html
+          echo '</div>' >> report.html
+          
           if [ $CRITICAL -gt 0 ]; then
             echo '<h2>🔥 CRITICAL</h2>' >> report.html
             jq -r 'select(.info.severity=="critical") | "<div class=\"vuln critical\"><b>" + .info.name + "</b><br>📍 " + .matched-at + "</div>"' results.json 2>/dev/null >> report.html
@@ -431,10 +419,14 @@ jobs:
           
           echo '<h2>📋 DANH SÁCH WEB</h2><div class="targets">' >> report.html
           cat targets.txt | while read url; do echo "<div class=\"target\">🌐 $url</div>" >> report.html; done
-          echo '</div><div class="footer">🧠 Tạo bởi CHỦ NHÂN VŨ TRỤ | CHIP V17.2</div></div></body></html>' >> report.html
+          echo '</div><div class="footer">🧠 Tạo bởi CHỦ NHÂN VŨ TRỤ | CHIP V17.3</div></div></body></html>' >> report.html
           
           echo "✅ BÁO CÁO HOÀN TẤT!"
-          cat CHIP_V17_REPORT.txt
+          echo ""
+          echo "════════════════════════════════════════════════════════════════════════════════"
+          echo "📋 XEM NHANH BÁO CÁO:"
+          echo "════════════════════════════════════════════════════════════════════════════════"
+          head -30 CHIP_V17_REPORT.txt
 
       - name: 💾 LƯU KHO BÁU
         if: always()
