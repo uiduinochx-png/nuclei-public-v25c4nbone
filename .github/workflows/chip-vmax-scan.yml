@@ -1,4 +1,4 @@
-name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.12 CHỌN LỌC 200"
+name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.12 FIXED"
 
 on:
   workflow_dispatch:
@@ -51,38 +51,22 @@ jobs:
     timeout-minutes: 55
     
     steps:
-      - name: 🧠 KHỞI TẠO CHIP V500.12
+      - name: 🧠 KHỞI TẠO CHIP V500.12 FIXED
         run: |
-          set -e
           echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-          echo "║                                                                            ║"
-          echo "║     🧠 CHIP V500.12 - CHỌN LỌC 200 WEB + QUÉT LỖ HỔNG                    ║"
-          echo "║                                                                            ║"
+          echo "║     🧠 CHIP V500.12 FIXED - CHỌN LỌC 200 WEB + QUÉT LỖ HỔNG              ║"
           echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-          echo ""
-          echo "🔥 CẤP ĐỘ AI: ${{ github.event.inputs.ai_level || '10000x' }}"
-          echo "🚀 CHẾ ĐỘ QUÉT: ${{ github.event.inputs.scan_mode || 'ultimate' }}"
-          echo "🎯 SỐ WEB CẦN CHỌN: ${{ github.event.inputs.target_count || '200' }}"
-          echo ""
-          echo "⚡ CHIP V500.12 - 2 GIAI ĐOẠN:"
-          echo "  📥 GIAI ĐOẠN 1: CHỌN LỌC 200 WEB TỪ HÀNG TRIỆU WEB"
-          echo "  🔍 GIAI ĐOẠN 2: QUÉT LỖ HỔNG TRÊN 200 WEB ĐÃ CHỌN"
-          echo "  🎯 MỤC TIÊU: LẤY LỖ HỔNG, KHÔNG PHẢI QUÉT VÔ HẠN"
-          echo "  ⚡ CONCURRENCY 60 - TỐI ƯU"
-          echo "  🚀 RATE LIMIT 50 - AN TOÀN"
+          echo "🔥 AI LEVEL: ${{ github.event.inputs.ai_level || '10000x' }}"
+          echo "🎯 SỐ WEB: ${{ github.event.inputs.target_count || '200' }}"
 
       - name: 📥 TẢI MÃ NGUỒN
         uses: actions/checkout@v4
 
-      - name: 📦 CÀI ĐẶT CÔNG CỤ + 15 TEMPLATE
+      - name: 📦 CÀI ĐẶT CÔNG CỤ
         run: |
-          set -e
-          echo "🔥 ĐANG CÀI ĐẶT CÔNG CỤ + 15 TEMPLATE..."
-          
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            jq curl git python3 python3-pip massdns nmap ffuf unzip wget \
-            && sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get install -y -qq --no-install-recommends jq curl git python3 python3-pip unzip wget
+          sudo rm -rf /var/lib/apt/lists/*
           
           wget -q https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
           sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
@@ -92,110 +76,65 @@ jobs:
           go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
           sudo cp ~/go/bin/nuclei /usr/local/bin/
           
-          echo "🔍 NUCLEI VERSION: $(nuclei -version 2>/dev/null | head -1 || echo 'N/A')"
-          
           pip3 install -q requests beautifulsoup4 lxml
           
           for i in 1 2 3; do
-            nuclei -update-templates -silent && break || echo "⚠️ Lỗi lần $i, thử lại..."
-            sleep 5
+            nuclei -update-templates -silent && break || sleep 5
           done
           
-          nuclei -templates-version
-          
-          echo "📥 TẢI 15 NGUỒN TEMPLATE..."
           mkdir -p ~/nuclei-templates
           cd ~/nuclei-templates
+          git clone --depth 1 -q https://github.com/projectdiscovery/nuclei-templates.git official 2>/dev/null || true
+          git clone --depth 1 -q https://github.com/geeknik/nuclei-templates.git geeknik 2>/dev/null || true
+          git clone --depth 1 -q https://github.com/notnotnotveg/nuclei-templates.git extra 2>/dev/null || true
+          git clone --depth 1 -q https://github.com/random-robbie/nuclei-templates.git random 2>/dev/null || true
+          git clone --depth 1 -q https://github.com/zeroc00I/nuclei-templates.git zero 2>/dev/null || true
           
-          repos=(
-            "projectdiscovery/nuclei-templates"
-            "geeknik/nuclei-templates"
-            "notnotnotveg/nuclei-templates"
-            "random-robbie/nuclei-templates"
-            "zeroc00I/nuclei-templates"
-            "gwen001/nuclei-templates"
-            "dhiyaneshdk/nuclei-templates"
-            "pikpikcu/nuclei-templates"
-            "ehsandeep/nuclei-templates"
-            "ddworken/nuclei-templates"
-            "s0md3v/nuclei-templates"
-            "r3naissance/nuclei-templates"
-            "loneferret/nuclei-templates"
-            "initstring/nuclei-templates"
-            "codingo/nuclei-templates"
-          )
-          
-          for repo in "${repos[@]}"; do
-            name=$(echo $repo | cut -d'/' -f2)
-            echo "  📥 Đang tải: $name..."
-            git clone --depth 1 -q "https://github.com/$repo.git" "$name" 2>/dev/null || true
-          done
-          
-          mkdir -p all
-          find . -name "*.yaml" -exec cp {} all/ \; 2>/dev/null
-          
-          TEMPLATE_COUNT=$(find . -name "*.yaml" | wc -l)
-          echo "📊 TỔNG TEMPLATE: $TEMPLATE_COUNT"
           echo "✅ CÀI ĐẶT HOÀN TẤT!"
 
-      - name: 📥 GIAI ĐOẠN 1 - CHỌN LỌC 200 WEB
+      - name: 📥 GIAI ĐOẠN 1 - CHỌN LỌC WEB
         id: select_targets
         run: |
-          set -e
-          echo ""
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "📥 GIAI ĐOẠN 1: CHỌN LỌC 200 WEB TỪ HÀNG TRIỆU WEB TOÀN CẦU"
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo ""
+          echo "📥 GIAI ĐOẠN 1: CHỌN LỌC WEB TỪ HÀNG TRIỆU WEB"
           
-          cat > selector.py << 'EOF'
-          import json, requests, subprocess, time
+          # Tạo file Python selector
+          cat > /tmp/selector.py << 'EOF'
+          import json, requests, subprocess, time, sys
           
-          print("🧠 CHIP V500.12 - CHỌN LỌC WEB THÔNG MINH")
-          print()
+          print("🧠 CHỌN LỌC WEB THÔNG MINH")
           
-          # === NGUỒN 1: TOP 1M ===
-          print("📥 1. ĐANG TẢI TOP 1M WEB...")
           all_sites = []
+          
+          # NGUỒN 1: Top 1M
+          print("📥 Đang tải Top 1M...")
           try:
               r = requests.get('https://raw.githubusercontent.com/mehulj94/top-1m/master/top-1m.txt', timeout=30)
               if r.status_code == 200:
-                  for line in r.text.splitlines()[:10000]:
+                  for line in r.text.splitlines()[:5000]:
                       domain = line.strip().lower()
                       if domain and '.' in domain:
                           all_sites.append(domain)
-                  print(f"  ✅ Lấy {len(r.text.splitlines()[:10000])} web từ Top 1M")
+                  print(f"  ✅ Lấy {len(all_sites)} web từ Top 1M")
           except Exception as e:
               print(f"  ⚠️ Lỗi: {e}")
           
-          # === NGUỒN 2: DANH SÁCH MẪU ===
-          print("📥 2. ĐANG THÊM DANH SÁCH WEB MẪU...")
+          # NGUỒN 2: Danh sách mẫu
           default_sites = [
-              'google.com', 'facebook.com', 'youtube.com', 'twitter.com', 'instagram.com',
-              'linkedin.com', 'reddit.com', 'netflix.com', 'amazon.com', 'ebay.com',
-              'microsoft.com', 'apple.com', 'adobe.com', 'salesforce.com', 'oracle.com',
-              'ibm.com', 'cisco.com', 'intel.com', 'nvidia.com', 'amd.com',
-              'bbc.com', 'guardian.co.uk', 'reuters.com', 'bloomberg.com', 'ft.com',
-              'alibaba.com', 'tencent.com', 'baidu.com', 'jd.com', 'xiaomi.com',
-              'naver.com', 'kakao.com', 'line.me', 'rakuten.co.jp', 'yahoo.co.jp',
-              'shopee.sg', 'lazada.com', 'tokopedia.com', 'grab.com', 'gojek.com',
-              'booking.com', 'airbnb.com', 'stripe.com', 'paypal.com', 'shopify.com',
-              'vietnamnet.vn', 'zingnews.vn', 'tiki.vn', 'shopee.vn', 'fpt.vn',
-              'viettel.vn', 'thegioididong.com', 'vnexpress.net', 'dantri.com.vn',
-              'chinhphu.vn', 'mof.gov.vn', 'mic.gov.vn', 'moit.gov.vn'
+              'google.com','facebook.com','youtube.com','twitter.com','instagram.com',
+              'linkedin.com','reddit.com','netflix.com','amazon.com','microsoft.com',
+              'apple.com','adobe.com','salesforce.com','oracle.com','ibm.com',
+              'bbc.com','guardian.co.uk','reuters.com','bloomberg.com','ft.com',
+              'alibaba.com','tencent.com','baidu.com','jd.com','naver.com',
+              'stripe.com','paypal.com','shopify.com','github.com','gitlab.com',
+              'vietnamnet.vn','zingnews.vn','tiki.vn','shopee.vn','fpt.vn',
+              'viettel.vn','thegioididong.com','vnexpress.net','dantri.com.vn',
+              'chinhphu.vn','mof.gov.vn','mic.gov.vn','moit.gov.vn'
           ]
           all_sites.extend(default_sites)
-          print(f"  ✅ Thêm {len(default_sites)} web mẫu")
-          
-          # Bỏ trùng
           all_sites = list(set(all_sites))
-          print()
           print(f"📊 TỔNG WEB RAW: {len(all_sites)}")
           
-          # === PHÂN TÍCH ĐIỂM ===
-          print()
-          print("🔍 ĐANG PHÂN TÍCH GIÁ TRỊ TỪNG WEB...")
-          
+          # PHÂN TÍCH ĐIỂM
           scored = []
           for site in all_sites:
               if not site or len(site) < 4:
@@ -205,7 +144,6 @@ jobs:
               reasons = []
               bounty = 0
               
-              # Tiêu chí đánh giá
               if any(kw in domain for kw in ['bank','finance','pay','payment']):
                   score += 40; reasons.append("Tài chính"); bounty += 5000
               if any(kw in domain for kw in ['crypto','bitcoin','eth','defi','blockchain']):
@@ -214,13 +152,11 @@ jobs:
                   score += 35; reasons.append("Chính phủ"); bounty += 3000
               if any(kw in domain for kw in ['edu','university','college']):
                   score += 30; reasons.append("Giáo dục"); bounty += 2000
-              if any(kw in domain for kw in ['army','navy','military','defense']):
-                  score += 40; reasons.append("Quân sự"); bounty += 5000
               if any(kw in domain for kw in ['api','gateway','auth']):
                   score += 25; reasons.append("API"); bounty += 1500
               if any(kw in domain for kw in ['admin','login','security']):
                   score += 20; reasons.append("Admin"); bounty += 1000
-              if any(kw in domain for kw in ['shop','store','cart','checkout']):
+              if any(kw in domain for kw in ['shop','store','cart']):
                   score += 15; reasons.append("E-commerce"); bounty += 800
               
               if len(domain) < 10: score += 5
@@ -242,18 +178,12 @@ jobs:
           
           print(f"📊 WEB CÓ ĐIỂM > 10: {len(scored)}")
           
-          # === CHỌN TOP 200 ===
+          # CHỌN TOP
+          target_count = 200
           scored.sort(key=lambda x: x['score'], reverse=True)
-          target_count = int(${{ github.event.inputs.target_count || '200' }})
           top_candidates = scored[:target_count * 2]
           
-          print()
-          print(f"🏆 CHỌN {target_count} WEB TỐT NHẤT TỪ {len(top_candidates)} ỨNG VIÊN...")
-          
-          # === KIỂM TRA SỐNG ===
-          print()
-          print("🔍 KIỂM TRA WEB CÒN SỐNG...")
-          
+          # KIỂM TRA SỐNG
           alive = []
           for target in top_candidates:
               if len(alive) >= target_count:
@@ -267,16 +197,15 @@ jobs:
                   code = result.stdout.strip()
                   if code in ['200', '301', '302', '403', '401']:
                       alive.append(target)
-                      print(f"  ✅ {url} - HTTP {code}")
+                      print(f"  ✅ {url}")
                   else:
-                      print(f"  ❌ {url} - HTTP {code}")
+                      print(f"  ❌ {url}")
               except:
-                  print(f"  ⚠️ {url} - TIMEOUT")
+                  print(f"  ⚠️ {url}")
           
-          print()
           print(f"📊 WEB CÒN SỐNG: {len(alive)}/{target_count}")
           
-          # === LƯU FILE ===
+          # LƯU FILE
           with open('targets.txt', 'w') as f:
               for t in alive:
                   f.write(f"{t['url']}\n")
@@ -284,23 +213,10 @@ jobs:
           with open('targets_analysis.json', 'w') as f:
               json.dump(alive, f, indent=2)
           
-          # === HIỂN THỊ KẾT QUẢ ===
-          print()
-          print("════════════════════════════════════════════════════════════════════════════════")
-          print("🏆 TOP 20 WEB GIÁ TRỊ CAO NHẤT:")
-          print("════════════════════════════════════════════════════════════════════════════════")
-          for i, t in enumerate(alive[:20], 1):
-              bounty_str = f"💰 ${t['bounty_estimate']:,}" if t['has_money'] else ""
-              print(f"{i:2}. {t['url']} - {t['score']} điểm {bounty_str}")
-              if t['reasons']:
-                  print(f"     📌 {', '.join(t['reasons'])}")
-          
-          print()
-          print(f"✅ ĐÃ CHỌN {len(alive)} WEB ĐỂ QUÉT")
-          print("════════════════════════════════════════════════════════════════════════════════")
+          print(f"✅ ĐÃ CHỌN {len(alive)} WEB")
           EOF
           
-          python3 selector.py
+          python3 /tmp/selector.py
           
           TARGET_COUNT=$(wc -l < targets.txt 2>/dev/null || echo 0)
           echo "target_count=$TARGET_COUNT" >> $GITHUB_ENV
@@ -323,23 +239,14 @@ jobs:
               echo "target_count=$TARGET_COUNT" >> $GITHUB_ENV
           fi
           
-          echo ""
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "✅ GIAI ĐOẠN 1 HOÀN TẤT - ĐÃ CHỌN ${{ env.target_count }} WEB"
-          echo "════════════════════════════════════════════════════════════════════════════════"
+          echo "🎯 SỐ WEB: $TARGET_COUNT"
           echo "📋 DANH SÁCH WEB (10 MỤC ĐẦU):"
           head -10 targets.txt
 
-      - name: 🔍 GIAI ĐOẠN 2 - QUÉT LỖ HỔNG TRÊN 200 WEB
+      - name: 🔍 GIAI ĐOẠN 2 - QUÉT LỖ HỔNG
         timeout-minutes: 45
         run: |
-          set -e
-          echo ""
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "🔍 GIAI ĐOẠN 2: QUÉT LỖ HỔNG TRÊN ${{ env.target_count }} WEB ĐÃ CHỌN"
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo ""
-          echo "⏰ BẮT ĐẦU QUÉT: $(date)"
+          echo "🔍 GIAI ĐOẠN 2: QUÉT LỖ HỔNG TRÊN ${{ env.target_count }} WEB"
           
           export PATH=$PATH:/usr/local/go/bin
           
@@ -349,159 +256,67 @@ jobs:
           TIMEOUT=25
           RETRIES=5
           MAX_REDIRECTS=15
+          SEVERITY="critical,high,medium,low,info"
           
-          if [ -z "${{ github.event.inputs.severity_level }}" ]; then
-            SEVERITY="critical,high,medium,low,info"
-          else
-            SEVERITY="${{ github.event.inputs.severity_level }}"
-          fi
-          
-          echo "⚙️ CẤU HÌNH QUÉT:"
           echo "⚙️ CONCURRENCY: $CONCURRENCY"
-          echo "⚙️ BULK_SIZE: $BULK_SIZE"
           echo "⚙️ RATE_LIMIT: $RATE_LIMIT"
-          echo "⚙️ TIMEOUT: $TIMEOUT"
-          echo "⚙️ SEVERITY: $SEVERITY"
-          echo ""
-          echo "🔥 ĐANG QUÉT LỖ HỔNG TRÊN ${{ env.target_count }} WEB..."
+          echo "🔥 BẮT ĐẦU QUÉT..."
           
           nuclei -list targets.txt -severity "$SEVERITY" \
             -t ~/nuclei-templates/ \
-            -t ~/nuclei-templates/all/ \
-            -t ~/nuclei-templates/nuclei-templates/ \
+            -t ~/nuclei-templates/official/ \
             -t ~/nuclei-templates/geeknik/ \
             -t ~/nuclei-templates/extra/ \
             -t ~/nuclei-templates/random/ \
             -t ~/nuclei-templates/zero/ \
-            -t ~/nuclei-templates/gwen001/ \
-            -t ~/nuclei-templates/dhiyaneshdk/ \
-            -t ~/nuclei-templates/pikpikcu/ \
-            -t ~/nuclei-templates/ehsandeep/ \
-            -t ~/nuclei-templates/ddworken/ \
-            -t ~/nuclei-templates/s0md3v/ \
-            -t ~/nuclei-templates/r3naissance/ \
-            -t ~/nuclei-templates/loneferret/ \
-            -t ~/nuclei-templates/initstring/ \
-            -t ~/nuclei-templates/codingo/ \
             -c $CONCURRENCY -bulk-size $BULK_SIZE -rate-limit $RATE_LIMIT \
             -timeout $TIMEOUT -retries $RETRIES -max-redirects $MAX_REDIRECTS -follow-redirects \
             -stats -stats-interval 15 -rdb report.db -json-export results.json \
             -jle results.jsonl -o results.txt -no-interactsh -disable-update-check \
             -max-host-error 15 -no-mhe -silent -no-color 2>&1 | tee scan.log
           
-          echo ""
-          echo "════════════════════════════════════════════════════════════════════════════════"
           echo "📊 KẾT QUẢ QUÉT:"
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          
           TOTAL=$(cat results.txt 2>/dev/null | wc -l || echo 0)
-          echo "📦 TỔNG SỐ LỖI: $TOTAL"
+          echo "📦 TỔNG LỖI: $TOTAL"
           
           if [ -f results.json ]; then
               CRITICAL=$(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)
               HIGH=$(jq -r 'select(.info.severity=="high")' results.json 2>/dev/null | wc -l || echo 0)
               MEDIUM=$(jq -r 'select(.info.severity=="medium")' results.json 2>/dev/null | wc -l || echo 0)
-              LOW=$(jq -r 'select(.info.severity=="low")' results.json 2>/dev/null | wc -l || echo 0)
-              INFO=$(jq -r 'select(.info.severity=="info")' results.json 2>/dev/null | wc -l || echo 0)
-              
-              echo "🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi)"
-              echo "⚡ HIGH: $HIGH      (💰 \$1,000+/lỗi)"
-              echo "🟡 MEDIUM: $MEDIUM  (💰 \$200+/lỗi)"
-              echo "🟢 LOW: $LOW        (💰 \$50+/lỗi)"
-              echo "ℹ️ INFO: $INFO      (💰 Có giá trị)"
+              echo "🔥 CRITICAL: $CRITICAL"
+              echo "⚡ HIGH: $HIGH"
+              echo "🟡 MEDIUM: $MEDIUM"
           fi
-          echo "════════════════════════════════════════════════════════════════════════════════"
 
       - name: 📄 BÁO CÁO
         if: always()
         run: |
-          set -e
-          echo "🧠 CHIP V500.12 ĐANG TẠO BÁO CÁO..."
-          
           TOTAL=$(jq -s 'length' results.json 2>/dev/null || echo 0)
           CRITICAL=$(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)
           HIGH=$(jq -r 'select(.info.severity=="high")' results.json 2>/dev/null | wc -l || echo 0)
           MEDIUM=$(jq -r 'select(.info.severity=="medium")' results.json 2>/dev/null | wc -l || echo 0)
-          LOW=$(jq -r 'select(.info.severity=="low")' results.json 2>/dev/null | wc -l || echo 0)
-          INFO=$(jq -r 'select(.info.severity=="info")' results.json 2>/dev/null | wc -l || echo 0)
           TARGET_COUNT=$(cat targets.txt 2>/dev/null | wc -l || echo 0)
           
-          ESTIMATED_BOUNTY=$((CRITICAL * 5000 + HIGH * 1000 + MEDIUM * 200 + LOW * 50))
-          RISK_SCORE=$((CRITICAL * 10 + HIGH * 5 + MEDIUM * 2))
-          
-          if [ $RISK_SCORE -gt 80 ]; then
-              RISK_LEVEL="🔴 CỰC KỲ NGUY HIỂM"
-          elif [ $RISK_SCORE -gt 50 ]; then
-              RISK_LEVEL="🟠 RẤT NGUY HIỂM"
-          elif [ $RISK_SCORE -gt 25 ]; then
-              RISK_LEVEL="🟡 NGUY HIỂM"
-          elif [ $RISK_SCORE -gt 10 ]; then
-              RISK_LEVEL="🟢 THẤP"
-          else
-              RISK_LEVEL="⚪ RẤT THẤP"
-          fi
+          ESTIMATED_BOUNTY=$((CRITICAL * 5000 + HIGH * 1000 + MEDIUM * 200))
           
           cat > FINAL_REPORT.txt << EOF
           ╔══════════════════════════════════════════════════════════════════════════════╗
-          ║     🧠 CHIP V500.12 - BÁO CÁO QUÉT 200 WEB ĐÃ CHỌN LỌC                   ║
+          ║     🧠 CHIP V500.12 FIXED - BÁO CÁO                                       ║
           ╚══════════════════════════════════════════════════════════════════════════════╝
           
           📅 $(date '+%Y-%m-%d %H:%M:%S')
-          🔄 LẦN QUÉT: #${{ github.run_number }}
           🎯 SỐ WEB: $TARGET_COUNT
-          🧠 AI LEVEL: ${{ github.event.inputs.ai_level || '10000x' }}
-          🚀 CHẾ ĐỘ: ${{ github.event.inputs.scan_mode || 'ultimate' }}
-          
-          ════════════════════════════════════════════════════════════════════════════════
-          📊 KẾT QUẢ
-          ════════════════════════════════════════════════════════════════════════════════
           
           📦 TỔNG LỖI: $TOTAL
           🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi)
           ⚡ HIGH: $HIGH          (💰 \$1,000+/lỗi)
           🟡 MEDIUM: $MEDIUM      (💰 \$200+/lỗi)
-          🟢 LOW: $LOW            (💰 \$50+/lỗi)
-          ℹ️ INFO: $INFO          (💰 Có giá trị)
           
-          ════════════════════════════════════════════════════════════════════════════════
-          💰 PHÂN TÍCH
-          ════════════════════════════════════════════════════════════════════════════════
-          📊 RISK SCORE: $RISK_SCORE
-          ⚠️ RISK LEVEL: $RISK_LEVEL
           💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)
+          
+          ✅ BÁO CÁO HOÀN TẤT!
           EOF
           
-          if [ $CRITICAL -gt 0 ]; then
-              echo "" >> FINAL_REPORT.txt
-              echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-              echo "🔥🔥🔥 LỖI CRITICAL" >> FINAL_REPORT.txt
-              echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-              jq -r 'select(.info.severity=="critical") | "📌 " + .info.name + " → " + .matched-at + " | CVE: " + (.info.cve_id // "N/A")' results.json 2>/dev/null >> FINAL_REPORT.txt
-          fi
-          
-          if [ $HIGH -gt 0 ]; then
-              echo "" >> FINAL_REPORT.txt
-              echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-              echo "⚡⚡⚡ LỖI HIGH" >> FINAL_REPORT.txt
-              echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-              jq -r 'select(.info.severity=="high") | "📌 " + .info.name + " → " + .matched-at + " | CVE: " + (.info.cve_id // "N/A")' results.json 2>/dev/null >> FINAL_REPORT.txt
-          fi
-          
-          echo "" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "📋 DANH SÁCH WEB ĐÃ CHỌN VÀ QUÉT" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          cat targets.txt >> FINAL_REPORT.txt
-          
-          echo "" >> FINAL_REPORT.txt
-          echo "╔══════════════════════════════════════════════════════════════════════════════╗" >> FINAL_REPORT.txt
-          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V500.12                                 ║" >> FINAL_REPORT.txt
-          echo "║  💰 \$$(printf "%'d" $ESTIMATED_BOUNTY)  |  ⚠️ $RISK_LEVEL                ║" >> FINAL_REPORT.txt
-          echo "║  📥 CHỌN LỌC $TARGET_COUNT WEB TỪ HÀNG TRIỆU WEB                         ║" >> FINAL_REPORT.txt
-          echo "║  🔍 QUÉT LỖ HỔNG TRÊN $TARGET_COUNT WEB ĐÃ CHỌN                         ║" >> FINAL_REPORT.txt
-          echo "╚══════════════════════════════════════════════════════════════════════════════╝" >> FINAL_REPORT.txt
-          
-          echo "✅ BÁO CÁO HOÀN TẤT!"
           cat FINAL_REPORT.txt
 
       - name: 💾 LƯU KHO BÁU
@@ -513,12 +328,8 @@ jobs:
             results.txt
             results.json
             FINAL_REPORT.txt
-            report.html
             targets.txt
             targets_analysis.json
-            history.json
-            report.db
             scan.log
             ~/nuclei-templates/
-            /tmp/nuclei-project/
           retention-days: 90
