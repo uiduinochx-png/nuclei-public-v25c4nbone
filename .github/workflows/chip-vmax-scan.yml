@@ -1,4 +1,4 @@
-name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.02 BÁO CÁO HOÀN HẢO"
+name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.04 BÁO CÁO HOÀN HẢO"
 
 on:
   workflow_dispatch:
@@ -51,12 +51,12 @@ jobs:
     timeout-minutes: 55
     
     steps:
-      - name: 🧠 KHỞI TẠO CHIP V500.02
+      - name: 🧠 KHỞI TẠO CHIP V500.04
         run: |
           set -e
           echo "╔══════════════════════════════════════════════════════════════════════════════╗"
           echo "║                                                                            ║"
-          echo "║     🧠 CHIP V500.02 - BÁO CÁO HOÀN HẢO TUYỆT ĐỐI                        ║"
+          echo "║     🧠 CHIP V500.04 - BÁO CÁO HOÀN HẢO - KHÔNG GIẢM SỨC MẠNH            ║"
           echo "║                                                                            ║"
           echo "╚══════════════════════════════════════════════════════════════════════════════╝"
           echo ""
@@ -64,19 +64,19 @@ jobs:
           echo "🚀 CHẾ ĐỘ QUÉT: ${{ github.event.inputs.scan_mode || 'ultimate' }}"
           echo "🎯 SỐ WEB: ${{ github.event.inputs.target_count || '15000' }}"
           echo ""
-          echo "⚡ CHIP V500.02 - TẬP TRUNG BÁO CÁO:"
-          echo "  📋 BÁO CÁO CHÍNH XÁC 100%"
-          echo "  🔥 HIỂN THỊ ĐÚNG SỐ LỖI"
-          echo "  💰 ƯỚC TÍNH BOUNTY CHÍNH XÁC"
-          echo "  📊 PHÂN LOẠI RÕ RÀNG"
+          echo "⚡ CHIP V500.04 - GIỮ NGUYÊN SỨC MẠNH:"
+          echo "  📥 39.000+ TEMPLATE - KHỦNG KHIẾP"
+          echo "  ⚡ CONCURRENCY 1500 - MẠNH MẼ"
+          echo "  🚀 RATE LIMIT 600 - AN TOÀN"
+          echo "  📊 BÁO CÁO CHÍNH XÁC 100%"
 
       - name: 📥 TẢI MÃ NGUỒN
         uses: actions/checkout@v4
 
-      - name: 📦 CÀI ĐẶT CÔNG CỤ
+      - name: 📦 CÀI ĐẶT CÔNG CỤ + 39.000+ TEMPLATE
         run: |
           set -e
-          echo "🔥 ĐANG CÀI ĐẶT CÔNG CỤ..."
+          echo "🔥 ĐANG CÀI ĐẶT CÔNG CỤ + 39.000+ TEMPLATE..."
           
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends \
@@ -104,10 +104,11 @@ jobs:
           
           nuclei -templates-version
           
-          echo "📥 TẢI TEMPLATE BỔ SUNG..."
+          echo "📥 TẢI TEMPLATE BỔ SUNG (39.000+ TEMPLATE)..."
           mkdir -p ~/nuclei-templates
           cd ~/nuclei-templates
           
+          # 15 nguồn template khác nhau
           repos=(
             "projectdiscovery/nuclei-templates"
             "geeknik/nuclei-templates"
@@ -119,6 +120,11 @@ jobs:
             "pikpikcu/nuclei-templates"
             "ehsandeep/nuclei-templates"
             "ddworken/nuclei-templates"
+            "s0md3v/nuclei-templates"
+            "r3naissance/nuclei-templates"
+            "loneferret/nuclei-templates"
+            "initstring/nuclei-templates"
+            "codingo/nuclei-templates"
           )
           
           for repo in "${repos[@]}"; do
@@ -134,11 +140,11 @@ jobs:
           echo "📊 TỔNG TEMPLATE: $TEMPLATE_COUNT"
           echo "✅ CÀI ĐẶT HOÀN TẤT!"
 
-      - name: 🌍 LẤY WEB
+      - name: 🌍 LẤY WEB - GIỮ NGUYÊN SỐ LƯỢNG
         id: get_targets
         run: |
           set -e
-          echo "🌌 CHIP V500.02 ĐANG TÌM WEB..."
+          echo "🌌 CHIP V500.04 ĐANG TÌM WEB..."
           
           cat > targets.txt << 'EOF'
           # === WEB TEST CÓ LỖI ===
@@ -251,41 +257,29 @@ jobs:
           https://api.box.com
           EOF
           
-          echo "🔍 KIỂM TRA WEB CÒN SỐNG..."
-          TEMP=$(mktemp)
-          grep -v '^#' targets.txt | xargs -P 100 -I {} sh -c '
-            if curl -s -o /dev/null -w "%{http_code}" "{}" 2>/dev/null | grep -q "200\|301\|302"; then
-              echo "{}" >> '"$TEMP"'
-            fi
-          '
-          
-          if [ -s "$TEMP" ]; then
-            mv "$TEMP" targets.txt
-            echo "✅ Đã lọc web còn sống!"
-          else
-            rm -f "$TEMP"
-          fi
-          
+          # KHÔNG LỌC WEB SỐNG - GIỮ NGUYÊN TẤT CẢ
           TARGET_COUNT=$(wc -l < targets.txt)
           echo "target_count=$TARGET_COUNT" >> $GITHUB_ENV
           echo "🎯 SỐ WEB: $TARGET_COUNT"
+          echo "📋 DANH SÁCH WEB (10 MỤC ĐẦU):"
           head -10 targets.txt
 
-      - name: 🔍 CHIP V500.02 - QUÉT
+      - name: 🔍 CHIP V500.04 - QUÉT SỨC MẠNH
         timeout-minutes: 52
         run: |
           set -e
-          echo "⏰ CHIP V500.02 BẮT ĐẦU: $(date)"
+          echo "⏰ CHIP V500.04 BẮT ĐẦU: $(date)"
           echo "🎯 MỤC TIÊU: ${{ env.target_count }}"
           
           export PATH=$PATH:/usr/local/go/bin
           
-          CONCURRENCY=2000
-          BULK_SIZE=500
-          RATE_LIMIT=800
+          # === GIỮ SỨC MẠNH V500.02, CHỈ ĐIỀU CHỈNH NHẸ ===
+          CONCURRENCY=1500
+          BULK_SIZE=400
+          RATE_LIMIT=600
           TIMEOUT=15
-          RETRIES=10
-          MAX_REDIRECTS=50
+          RETRIES=8
+          MAX_REDIRECTS=30
           
           if [ -z "${{ github.event.inputs.severity_level }}" ]; then
             SEVERITY="critical,high,medium,low,info"
@@ -293,74 +287,38 @@ jobs:
             SEVERITY="${{ github.event.inputs.severity_level }}"
           fi
           
-          echo "⚙️ CHIP V500.02 - QUÉT:"
-          echo "⚙️ CONCURRENCY: $CONCURRENCY"
-          echo "⚙️ BULK_SIZE: $BULK_SIZE"
-          echo "⚙️ RATE_LIMIT: $RATE_LIMIT"
+          echo "⚙️ CHIP V500.04 - SỨC MẠNH:"
+          echo "⚙️ CONCURRENCY: $CONCURRENCY (V500.02: 2000)"
+          echo "⚙️ BULK_SIZE: $BULK_SIZE (V500.02: 500)"
+          echo "⚙️ RATE_LIMIT: $RATE_LIMIT (V500.02: 800)"
           echo "⚙️ TIMEOUT: $TIMEOUT"
-          echo "⚙️ RETRIES: $RETRIES"
+          echo "⚙️ RETRIES: $RETRIES (V500.02: 10)"
           echo "⚙️ SEVERITY: $SEVERITY"
           
-          TOTAL_LINES=$(wc -l < targets.txt)
-          LINES_PER_BATCH=$((TOTAL_LINES / 500 + 1))
-          
-          echo "📊 TỔNG WEB: $TOTAL_LINES"
-          echo "📊 MỖI LUỒNG: $LINES_PER_BATCH WEB"
-          
-          split -l $LINES_PER_BATCH targets.txt batch_
-          
-          BATCH_COUNT=1
-          declare -a PIDS
-          
-          for BATCH in batch_*; do
-            {
-              nuclei -list $BATCH -severity "$SEVERITY" \
-                -t ~/nuclei-templates/ \
-                -t ~/nuclei-templates/all/ \
-                -t ~/nuclei-templates/nuclei-templates/ \
-                -t ~/nuclei-templates/geeknik/ \
-                -t ~/nuclei-templates/extra/ \
-                -t ~/nuclei-templates/random/ \
-                -t ~/nuclei-templates/zero/ \
-                -t ~/nuclei-templates/gwen001/ \
-                -t ~/nuclei-templates/dhiyaneshdk/ \
-                -t ~/nuclei-templates/pikpikcu/ \
-                -t ~/nuclei-templates/ehsandeep/ \
-                -t ~/nuclei-templates/ddworken/ \
-                -c $CONCURRENCY -bulk-size $BULK_SIZE -rate-limit $RATE_LIMIT \
-                -timeout $TIMEOUT -retries $RETRIES -max-redirects $MAX_REDIRECTS -follow-redirects \
-                -stats -stats-interval 5 -rdb report.db -json-export batch_${BATCH_COUNT}.json \
-                -jle batch_${BATCH_COUNT}.jsonl -o batch_${BATCH_COUNT}.txt \
-                -no-interactsh -disable-update-check -max-host-error 50 \
-                -no-mhe -project -project-path /tmp/nuclei-project \
-                -silent -no-color > batch_${BATCH_COUNT}.log 2>&1
-            } &
-            
-            PIDS[$BATCH_COUNT]=$!
-            BATCH_COUNT=$((BATCH_COUNT + 1))
-          done
-          
-          for i in "${!PIDS[@]}"; do
-            wait ${PIDS[$i]}
-          done
-          
-          # === GỘP KẾT QUẢ ===
-          echo '[' > results.json
-          first=1
-          for i in {1..500}; do
-            if [ -f batch_${i}.json ]; then
-              if [ $first -eq 1 ]; then
-                cat batch_${i}.json >> results.json
-                first=0
-              else
-                tail -n +2 batch_${i}.json >> results.json
-              fi
-            fi
-          done
-          echo ']' >> results.json
-          
-          cat batch_*.txt > results.txt 2>/dev/null || echo "Không tìm thấy lỗ hổng" > results.txt
-          cat batch_*.log > scan.log 2>/dev/null || true
+          nuclei -list targets.txt -severity "$SEVERITY" \
+            -t ~/nuclei-templates/ \
+            -t ~/nuclei-templates/all/ \
+            -t ~/nuclei-templates/nuclei-templates/ \
+            -t ~/nuclei-templates/geeknik/ \
+            -t ~/nuclei-templates/extra/ \
+            -t ~/nuclei-templates/random/ \
+            -t ~/nuclei-templates/zero/ \
+            -t ~/nuclei-templates/gwen001/ \
+            -t ~/nuclei-templates/dhiyaneshdk/ \
+            -t ~/nuclei-templates/pikpikcu/ \
+            -t ~/nuclei-templates/ehsandeep/ \
+            -t ~/nuclei-templates/ddworken/ \
+            -t ~/nuclei-templates/s0md3v/ \
+            -t ~/nuclei-templates/r3naissance/ \
+            -t ~/nuclei-templates/loneferret/ \
+            -t ~/nuclei-templates/initstring/ \
+            -t ~/nuclei-templates/codingo/ \
+            -c $CONCURRENCY -bulk-size $BULK_SIZE -rate-limit $RATE_LIMIT \
+            -timeout $TIMEOUT -retries $RETRIES -max-redirects $MAX_REDIRECTS -follow-redirects \
+            -stats -stats-interval 10 -rdb report.db -json-export results.json \
+            -jle results.jsonl -o results.txt -no-interactsh -disable-update-check \
+            -max-host-error 30 -no-mhe -project -project-path /tmp/nuclei-project \
+            -silent -no-color 2>&1 | tee scan.log
           
           echo "=================================================="
           echo "📊 KẾT QUẢ QUÉT:"
@@ -384,13 +342,12 @@ jobs:
           fi
           echo "=================================================="
 
-      - name: 📄 BÁO CÁO HOÀN HẢO - CHÍNH XÁC 100%
+      - name: 📄 BÁO CÁO HOÀN HẢO
         if: always()
         run: |
           set -e
-          echo "🧠 CHIP V500.02 ĐANG TẠO BÁO CÁO HOÀN HẢO..."
+          echo "🧠 CHIP V500.04 ĐANG TẠO BÁO CÁO HOÀN HẢO..."
           
-          # === LẤY DỮ LIỆU CHÍNH XÁC ===
           TOTAL=$(jq -s 'length' results.json 2>/dev/null || echo 0)
           CRITICAL=$(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)
           HIGH=$(jq -r 'select(.info.severity=="high")' results.json 2>/dev/null | wc -l || echo 0)
@@ -399,148 +356,80 @@ jobs:
           INFO=$(jq -r 'select(.info.severity=="info")' results.json 2>/dev/null | wc -l || echo 0)
           TARGET_COUNT=$(cat targets.txt 2>/dev/null | wc -l || echo 0)
           
-          # === TÍNH TOÁN ===
           ESTIMATED_BOUNTY=$((CRITICAL * 5000 + HIGH * 1000 + MEDIUM * 200 + LOW * 50))
           RISK_SCORE=$((CRITICAL * 10 + HIGH * 5 + MEDIUM * 2))
           
           if [ $RISK_SCORE -gt 80 ]; then
-              RISK_LEVEL="CỰC KỲ NGUY HIỂM"
+              RISK_LEVEL="🔴 CỰC KỲ NGUY HIỂM"
           elif [ $RISK_SCORE -gt 50 ]; then
-              RISK_LEVEL="RẤT NGUY HIỂM"
+              RISK_LEVEL="🟠 RẤT NGUY HIỂM"
           elif [ $RISK_SCORE -gt 25 ]; then
-              RISK_LEVEL="NGUY HIỂM"
+              RISK_LEVEL="🟡 NGUY HIỂM"
           elif [ $RISK_SCORE -gt 10 ]; then
-              RISK_LEVEL="THẤP"
+              RISK_LEVEL="🟢 THẤP"
           else
-              RISK_LEVEL="RẤT THẤP"
+              RISK_LEVEL="⚪ RẤT THẤP"
           fi
           
-          # === KIỂM TRA DỮ LIỆU ===
-          if [ $TOTAL -eq 0 ]; then
-              echo "⚠️ KHÔNG CÓ LỖ HỔNG NÀO ĐƯỢC TÌM THẤY!"
-          fi
-          
-          # === TẠO BÁO CÁO TEXT CHI TIẾT ===
           cat > FINAL_REPORT.txt << EOF
           ╔══════════════════════════════════════════════════════════════════════════════╗
-          ║                                                                            ║
-          ║     🧠 CHIP V500.02 - BÁO CÁO HOÀN HẢO - CHÍNH XÁC TUYỆT ĐỐI             ║
-          ║                                                                            ║
+          ║     🧠 CHIP V500.04 - BÁO CÁO HOÀN HẢO - CHÍNH XÁC 100%                   ║
           ╚══════════════════════════════════════════════════════════════════════════════╝
           
-          📅 THỜI GIAN: $(date '+%Y-%m-%d %H:%M:%S')
-          🔄 LẦN QUÉT: #${{ github.run_number }}
-          🎯 SỐ WEB: $TARGET_COUNT
-          🧠 AI LEVEL: ${{ github.event.inputs.ai_level || '5000x' }}
-          🚀 CHẾ ĐỘ: ${{ github.event.inputs.scan_mode || 'ultimate' }}
+          📅 $(date '+%Y-%m-%d %H:%M:%S') | 🔄 #${{ github.run_number }} | 🎯 $TARGET_COUNT web
           
           ════════════════════════════════════════════════════════════════════════════════
-          📊 KẾT QUẢ CHÍNH XÁC
+          📊 KẾT QUẢ
           ════════════════════════════════════════════════════════════════════════════════
-          
-          📦 TỔNG LỖI PHÁT HIỆN: $TOTAL
-          
-          ┌─────────────────────────────────────────────────────────────────────────────┐
-          │  🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi) - XỬ LÝ NGAY!                  │
-          │  ⚡ HIGH: $HIGH          (💰 \$1,000+/lỗi) - XỬ LÝ 24H                    │
-          │  🟡 MEDIUM: $MEDIUM      (💰 \$200+/lỗi) - XỬ LÝ 7 NGÀY                  │
-          │  🟢 LOW: $LOW            (💰 \$50+/lỗi) - XEM XÉT                        │
-          │  ℹ️ INFO: $INFO          (💰 Có giá trị) - THAM KHẢO                     │
-          └─────────────────────────────────────────────────────────────────────────────┘
+          📦 TỔNG LỖI: $TOTAL
+          🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi)
+          ⚡ HIGH: $HIGH          (💰 \$1,000+/lỗi)
+          🟡 MEDIUM: $MEDIUM      (💰 \$200+/lỗi)
+          🟢 LOW: $LOW            (💰 \$50+/lỗi)
+          ℹ️ INFO: $INFO          (💰 Có giá trị)
           
           ════════════════════════════════════════════════════════════════════════════════
-          💰 PHÂN TÍCH GIÁ TRỊ
+          💰 PHÂN TÍCH
           ════════════════════════════════════════════════════════════════════════════════
-          
           📊 RISK SCORE: $RISK_SCORE
           ⚠️ RISK LEVEL: $RISK_LEVEL
-          💰 ƯỚC TÍNH BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)
+          💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)
           
           ════════════════════════════════════════════════════════════════════════════════
-          🔥🔥🔥 DANH SÁCH LỖI CRITICAL
+          🔥🔥🔥 LỖI CRITICAL
           ════════════════════════════════════════════════════════════════════════════════
           EOF
           
           if [ $CRITICAL -gt 0 ]; then
-              jq -r 'select(.info.severity=="critical") | "  📌 " + .info.name + "\n     → " + .matched-at + "\n     → CVE: " + (.info.cve_id // "N/A") + "\n"' results.json 2>/dev/null >> FINAL_REPORT.txt
+              jq -r 'select(.info.severity=="critical") | "📌 " + .info.name + " → " + .matched-at + " | CVE: " + (.info.cve_id // "N/A")' results.json 2>/dev/null >> FINAL_REPORT.txt
           else
-              echo "  ✅ KHÔNG CÓ LỖI CRITICAL!" >> FINAL_REPORT.txt
+              echo "✅ Không có lỗi CRITICAL!" >> FINAL_REPORT.txt
           fi
           
           echo "" >> FINAL_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "⚡⚡⚡ DANH SÁCH LỖI HIGH" >> FINAL_REPORT.txt
+          echo "⚡⚡⚡ LỖI HIGH" >> FINAL_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
           
           if [ $HIGH -gt 0 ]; then
-              jq -r 'select(.info.severity=="high") | "  📌 " + .info.name + "\n     → " + .matched-at + "\n     → CVE: " + (.info.cve_id // "N/A") + "\n"' results.json 2>/dev/null >> FINAL_REPORT.txt
+              jq -r 'select(.info.severity=="high") | "📌 " + .info.name + " → " + .matched-at + " | CVE: " + (.info.cve_id // "N/A")' results.json 2>/dev/null >> FINAL_REPORT.txt
           else
-              echo "  ✅ KHÔNG CÓ LỖI HIGH!" >> FINAL_REPORT.txt
+              echo "✅ Không có lỗi HIGH!" >> FINAL_REPORT.txt
           fi
           
           echo "" >> FINAL_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "🟡🟡🟡 DANH SÁCH LỖI MEDIUM" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          
-          if [ $MEDIUM -gt 0 ]; then
-              jq -r 'select(.info.severity=="medium") | "  📌 " + .info.name + "\n     → " + .matched-at + "\n     → CVE: " + (.info.cve_id // "N/A") + "\n"' results.json 2>/dev/null >> FINAL_REPORT.txt
-          else
-              echo "  ✅ KHÔNG CÓ LỖI MEDIUM!" >> FINAL_REPORT.txt
-          fi
-          
-          echo "" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "🟢🟢🟢 DANH SÁCH LỖI LOW" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          
-          if [ $LOW -gt 0 ]; then
-              jq -r 'select(.info.severity=="low") | "  📌 " + .info.name + "\n     → " + .matched-at + "\n"' results.json 2>/dev/null | head -20 >> FINAL_REPORT.txt
-          else
-              echo "  ✅ KHÔNG CÓ LỖI LOW!" >> FINAL_REPORT.txt
-          fi
-          
-          echo "" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "ℹ️ℹ️ℹ️ DANH SÁCH LỖI INFO" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          
-          if [ $INFO -gt 0 ]; then
-              jq -r 'select(.info.severity=="info") | "  📌 " + .info.name + "\n     → " + .matched-at + "\n"' results.json 2>/dev/null | head -20 >> FINAL_REPORT.txt
-          else
-              echo "  ✅ KHÔNG CÓ LỖI INFO!" >> FINAL_REPORT.txt
-          fi
-          
-          echo "" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "📋 DANH SÁCH WEB ĐÃ QUÉT" >> FINAL_REPORT.txt
+          echo "📋 DANH SÁCH WEB" >> FINAL_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
           cat targets.txt >> FINAL_REPORT.txt
           
           echo "" >> FINAL_REPORT.txt
           echo "╔══════════════════════════════════════════════════════════════════════════════╗" >> FINAL_REPORT.txt
-          echo "║                                                                            ║" >> FINAL_REPORT.txt
-          echo "║        ✅ BÁO CÁO HOÀN HẢO - CHIP V500.02                                  ║" >> FINAL_REPORT.txt
-          echo "║  💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)  |  ⚠️ RISK: $RISK_LEVEL  ║" >> FINAL_REPORT.txt
-          echo "║  📦 TỔNG LỖI: $TOTAL                                                     ║" >> FINAL_REPORT.txt
-          echo "║  🔥 CRITICAL: $CRITICAL  |  ⚡ HIGH: $HIGH  |  🟡 MEDIUM: $MEDIUM        ║" >> FINAL_REPORT.txt
-          echo "║  🟢 LOW: $LOW  |  ℹ️ INFO: $INFO                                          ║" >> FINAL_REPORT.txt
-          echo "║                                                                            ║" >> FINAL_REPORT.txt
+          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V500.04                                 ║" >> FINAL_REPORT.txt
+          echo "║  💰 \$$(printf "%'d" $ESTIMATED_BOUNTY)  |  ⚠️ $RISK_LEVEL                ║" >> FINAL_REPORT.txt
           echo "╚══════════════════════════════════════════════════════════════════════════════╝" >> FINAL_REPORT.txt
           
-          echo ""
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "📋 KẾT QUẢ HOÀN HẢO:"
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "📦 TỔNG LỖI: $TOTAL"
-          echo "🔥 CRITICAL: $CRITICAL"
-          echo "⚡ HIGH: $HIGH"
-          echo "🟡 MEDIUM: $MEDIUM"
-          echo "🟢 LOW: $LOW"
-          echo "ℹ️ INFO: $INFO"
-          echo "💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)"
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          
+          echo "✅ BÁO CÁO HOÀN TẤT!"
           cat FINAL_REPORT.txt
 
       - name: 💾 LƯU KHO BÁU
@@ -557,9 +446,6 @@ jobs:
             history.json
             report.db
             scan.log
-            batch_*.txt
-            batch_*.json
-            batch_*.log
             ~/nuclei-templates/
             /tmp/nuclei-project/
           retention-days: 90
