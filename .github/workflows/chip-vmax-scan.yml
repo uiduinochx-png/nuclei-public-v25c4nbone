@@ -1,4 +1,4 @@
-name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.04 BÁO CÁO HOÀN HẢO"
+name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.06 VỪA ĐỦ"
 
 on:
   workflow_dispatch:
@@ -51,12 +51,12 @@ jobs:
     timeout-minutes: 55
     
     steps:
-      - name: 🧠 KHỞI TẠO CHIP V500.04
+      - name: 🧠 KHỞI TẠO CHIP V500.06
         run: |
           set -e
           echo "╔══════════════════════════════════════════════════════════════════════════════╗"
           echo "║                                                                            ║"
-          echo "║     🧠 CHIP V500.04 - BÁO CÁO HOÀN HẢO - KHÔNG GIẢM SỨC MẠNH            ║"
+          echo "║     🧠 CHIP V500.06 - VỪA ĐỦ SỨC - CHẠY ỔN ĐỊNH                         ║"
           echo "║                                                                            ║"
           echo "╚══════════════════════════════════════════════════════════════════════════════╝"
           echo ""
@@ -64,19 +64,19 @@ jobs:
           echo "🚀 CHẾ ĐỘ QUÉT: ${{ github.event.inputs.scan_mode || 'ultimate' }}"
           echo "🎯 SỐ WEB: ${{ github.event.inputs.target_count || '15000' }}"
           echo ""
-          echo "⚡ CHIP V500.04 - GIỮ NGUYÊN SỨC MẠNH:"
-          echo "  📥 39.000+ TEMPLATE - KHỦNG KHIẾP"
-          echo "  ⚡ CONCURRENCY 1500 - MẠNH MẼ"
-          echo "  🚀 RATE LIMIT 600 - AN TOÀN"
-          echo "  📊 BÁO CÁO CHÍNH XÁC 100%"
+          echo "⚡ CHIP V500.06 - CÂN BẰNG:"
+          echo "  📥 10 nguồn template - ĐỦ MẠNH"
+          echo "  ⚡ CONCURRENCY 80 - VỪA ĐỦ"
+          echo "  🚀 RATE LIMIT 50 - AN TOÀN"
+          echo "  ⏱️ KHÔNG TIMEOUT - CHẠY ỔN ĐỊNH"
 
       - name: 📥 TẢI MÃ NGUỒN
         uses: actions/checkout@v4
 
-      - name: 📦 CÀI ĐẶT CÔNG CỤ + 39.000+ TEMPLATE
+      - name: 📦 CÀI ĐẶT CÔNG CỤ
         run: |
           set -e
-          echo "🔥 ĐANG CÀI ĐẶT CÔNG CỤ + 39.000+ TEMPLATE..."
+          echo "🔥 ĐANG CÀI ĐẶT CÔNG CỤ..."
           
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends \
@@ -104,11 +104,10 @@ jobs:
           
           nuclei -templates-version
           
-          echo "📥 TẢI TEMPLATE BỔ SUNG (39.000+ TEMPLATE)..."
+          echo "📥 TẢI 10 NGUỒN TEMPLATE..."
           mkdir -p ~/nuclei-templates
           cd ~/nuclei-templates
           
-          # 15 nguồn template khác nhau
           repos=(
             "projectdiscovery/nuclei-templates"
             "geeknik/nuclei-templates"
@@ -120,11 +119,6 @@ jobs:
             "pikpikcu/nuclei-templates"
             "ehsandeep/nuclei-templates"
             "ddworken/nuclei-templates"
-            "s0md3v/nuclei-templates"
-            "r3naissance/nuclei-templates"
-            "loneferret/nuclei-templates"
-            "initstring/nuclei-templates"
-            "codingo/nuclei-templates"
           )
           
           for repo in "${repos[@]}"; do
@@ -140,11 +134,11 @@ jobs:
           echo "📊 TỔNG TEMPLATE: $TEMPLATE_COUNT"
           echo "✅ CÀI ĐẶT HOÀN TẤT!"
 
-      - name: 🌍 LẤY WEB - GIỮ NGUYÊN SỐ LƯỢNG
+      - name: 🌍 LẤY WEB
         id: get_targets
         run: |
           set -e
-          echo "🌌 CHIP V500.04 ĐANG TÌM WEB..."
+          echo "🌌 CHIP V500.06 ĐANG TÌM WEB..."
           
           cat > targets.txt << 'EOF'
           # === WEB TEST CÓ LỖI ===
@@ -257,29 +251,27 @@ jobs:
           https://api.box.com
           EOF
           
-          # KHÔNG LỌC WEB SỐNG - GIỮ NGUYÊN TẤT CẢ
           TARGET_COUNT=$(wc -l < targets.txt)
           echo "target_count=$TARGET_COUNT" >> $GITHUB_ENV
           echo "🎯 SỐ WEB: $TARGET_COUNT"
-          echo "📋 DANH SÁCH WEB (10 MỤC ĐẦU):"
           head -10 targets.txt
 
-      - name: 🔍 CHIP V500.04 - QUÉT SỨC MẠNH
+      - name: 🔍 CHIP V500.06 - QUÉT VỪA ĐỦ
         timeout-minutes: 52
         run: |
           set -e
-          echo "⏰ CHIP V500.04 BẮT ĐẦU: $(date)"
+          echo "⏰ CHIP V500.06 BẮT ĐẦU: $(date)"
           echo "🎯 MỤC TIÊU: ${{ env.target_count }}"
           
           export PATH=$PATH:/usr/local/go/bin
           
-          # === GIỮ SỨC MẠNH V500.02, CHỈ ĐIỀU CHỈNH NHẸ ===
-          CONCURRENCY=1500
-          BULK_SIZE=400
-          RATE_LIMIT=600
-          TIMEOUT=15
-          RETRIES=8
-          MAX_REDIRECTS=30
+          # === CÂN BẰNG HOÀN HẢO ===
+          CONCURRENCY=80
+          BULK_SIZE=40
+          RATE_LIMIT=50
+          TIMEOUT=18
+          RETRIES=5
+          MAX_REDIRECTS=15
           
           if [ -z "${{ github.event.inputs.severity_level }}" ]; then
             SEVERITY="critical,high,medium,low,info"
@@ -287,13 +279,14 @@ jobs:
             SEVERITY="${{ github.event.inputs.severity_level }}"
           fi
           
-          echo "⚙️ CHIP V500.04 - SỨC MẠNH:"
-          echo "⚙️ CONCURRENCY: $CONCURRENCY (V500.02: 2000)"
-          echo "⚙️ BULK_SIZE: $BULK_SIZE (V500.02: 500)"
-          echo "⚙️ RATE_LIMIT: $RATE_LIMIT (V500.02: 800)"
+          echo "⚙️ CHIP V500.06 - VỪA ĐỦ:"
+          echo "⚙️ CONCURRENCY: $CONCURRENCY"
+          echo "⚙️ BULK_SIZE: $BULK_SIZE"
+          echo "⚙️ RATE_LIMIT: $RATE_LIMIT"
           echo "⚙️ TIMEOUT: $TIMEOUT"
-          echo "⚙️ RETRIES: $RETRIES (V500.02: 10)"
-          echo "⚙️ SEVERITY: $SEVERITY"
+          echo "⚙️ RETRIES: $RETRIES"
+          echo ""
+          echo "🔥 QUÉT VỪA ĐỦ - CHẠY ỔN ĐỊNH!"
           
           nuclei -list targets.txt -severity "$SEVERITY" \
             -t ~/nuclei-templates/ \
@@ -308,16 +301,11 @@ jobs:
             -t ~/nuclei-templates/pikpikcu/ \
             -t ~/nuclei-templates/ehsandeep/ \
             -t ~/nuclei-templates/ddworken/ \
-            -t ~/nuclei-templates/s0md3v/ \
-            -t ~/nuclei-templates/r3naissance/ \
-            -t ~/nuclei-templates/loneferret/ \
-            -t ~/nuclei-templates/initstring/ \
-            -t ~/nuclei-templates/codingo/ \
             -c $CONCURRENCY -bulk-size $BULK_SIZE -rate-limit $RATE_LIMIT \
             -timeout $TIMEOUT -retries $RETRIES -max-redirects $MAX_REDIRECTS -follow-redirects \
             -stats -stats-interval 10 -rdb report.db -json-export results.json \
             -jle results.jsonl -o results.txt -no-interactsh -disable-update-check \
-            -max-host-error 30 -no-mhe -project -project-path /tmp/nuclei-project \
+            -max-host-error 20 -no-mhe -project -project-path /tmp/nuclei-project \
             -silent -no-color 2>&1 | tee scan.log
           
           echo "=================================================="
@@ -346,7 +334,7 @@ jobs:
         if: always()
         run: |
           set -e
-          echo "🧠 CHIP V500.04 ĐANG TẠO BÁO CÁO HOÀN HẢO..."
+          echo "🧠 CHIP V500.06 ĐANG TẠO BÁO CÁO..."
           
           TOTAL=$(jq -s 'length' results.json 2>/dev/null || echo 0)
           CRITICAL=$(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)
@@ -373,7 +361,7 @@ jobs:
           
           cat > FINAL_REPORT.txt << EOF
           ╔══════════════════════════════════════════════════════════════════════════════╗
-          ║     🧠 CHIP V500.04 - BÁO CÁO HOÀN HẢO - CHÍNH XÁC 100%                   ║
+          ║     🧠 CHIP V500.06 - BÁO CÁO HOÀN HẢO - VỪA ĐỦ SỨC                      ║
           ╚══════════════════════════════════════════════════════════════════════════════╝
           
           📅 $(date '+%Y-%m-%d %H:%M:%S') | 🔄 #${{ github.run_number }} | 🎯 $TARGET_COUNT web
@@ -394,38 +382,11 @@ jobs:
           📊 RISK SCORE: $RISK_SCORE
           ⚠️ RISK LEVEL: $RISK_LEVEL
           💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)
-          
-          ════════════════════════════════════════════════════════════════════════════════
-          🔥🔥🔥 LỖI CRITICAL
-          ════════════════════════════════════════════════════════════════════════════════
           EOF
-          
-          if [ $CRITICAL -gt 0 ]; then
-              jq -r 'select(.info.severity=="critical") | "📌 " + .info.name + " → " + .matched-at + " | CVE: " + (.info.cve_id // "N/A")' results.json 2>/dev/null >> FINAL_REPORT.txt
-          else
-              echo "✅ Không có lỗi CRITICAL!" >> FINAL_REPORT.txt
-          fi
-          
-          echo "" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "⚡⚡⚡ LỖI HIGH" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          
-          if [ $HIGH -gt 0 ]; then
-              jq -r 'select(.info.severity=="high") | "📌 " + .info.name + " → " + .matched-at + " | CVE: " + (.info.cve_id // "N/A")' results.json 2>/dev/null >> FINAL_REPORT.txt
-          else
-              echo "✅ Không có lỗi HIGH!" >> FINAL_REPORT.txt
-          fi
-          
-          echo "" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          echo "📋 DANH SÁCH WEB" >> FINAL_REPORT.txt
-          echo "════════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
-          cat targets.txt >> FINAL_REPORT.txt
           
           echo "" >> FINAL_REPORT.txt
           echo "╔══════════════════════════════════════════════════════════════════════════════╗" >> FINAL_REPORT.txt
-          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V500.04                                 ║" >> FINAL_REPORT.txt
+          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V500.06                                 ║" >> FINAL_REPORT.txt
           echo "║  💰 \$$(printf "%'d" $ESTIMATED_BOUNTY)  |  ⚠️ $RISK_LEVEL                ║" >> FINAL_REPORT.txt
           echo "╚══════════════════════════════════════════════════════════════════════════════╝" >> FINAL_REPORT.txt
           
