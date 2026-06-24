@@ -1,4 +1,4 @@
-name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.12 FIXED"
+name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V500.12 FINAL"
 
 on:
   workflow_dispatch:
@@ -51,12 +51,11 @@ jobs:
     timeout-minutes: 55
     
     steps:
-      - name: 🧠 KHỞI TẠO CHIP V500.12 FIXED
+      - name: 🧠 KHỞI TẠO
         run: |
           echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-          echo "║     🧠 CHIP V500.12 FIXED - CHỌN LỌC 200 WEB + QUÉT LỖ HỔNG              ║"
+          echo "║     🧠 CHIP V500.12 FINAL - CHỌN LỌC WEB + QUÉT LỖ HỔNG                   ║"
           echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-          echo "🔥 AI LEVEL: ${{ github.event.inputs.ai_level || '10000x' }}"
           echo "🎯 SỐ WEB: ${{ github.event.inputs.target_count || '200' }}"
 
       - name: 📥 TẢI MÃ NGUỒN
@@ -87,134 +86,119 @@ jobs:
           git clone --depth 1 -q https://github.com/projectdiscovery/nuclei-templates.git official 2>/dev/null || true
           git clone --depth 1 -q https://github.com/geeknik/nuclei-templates.git geeknik 2>/dev/null || true
           git clone --depth 1 -q https://github.com/notnotnotveg/nuclei-templates.git extra 2>/dev/null || true
-          git clone --depth 1 -q https://github.com/random-robbie/nuclei-templates.git random 2>/dev/null || true
-          git clone --depth 1 -q https://github.com/zeroc00I/nuclei-templates.git zero 2>/dev/null || true
           
           echo "✅ CÀI ĐẶT HOÀN TẤT!"
 
       - name: 📥 GIAI ĐOẠN 1 - CHỌN LỌC WEB
         id: select_targets
         run: |
-          echo "📥 GIAI ĐOẠN 1: CHỌN LỌC WEB TỪ HÀNG TRIỆU WEB"
+          echo "📥 GIAI ĐOẠN 1: CHỌN LỌC WEB"
           
-          # Tạo file Python selector
-          cat > /tmp/selector.py << 'EOF'
-          import json, requests, subprocess, time, sys
-          
-          print("🧠 CHỌN LỌC WEB THÔNG MINH")
-          
-          all_sites = []
-          
-          # NGUỒN 1: Top 1M
-          print("📥 Đang tải Top 1M...")
-          try:
-              r = requests.get('https://raw.githubusercontent.com/mehulj94/top-1m/master/top-1m.txt', timeout=30)
-              if r.status_code == 200:
-                  for line in r.text.splitlines()[:5000]:
-                      domain = line.strip().lower()
-                      if domain and '.' in domain:
-                          all_sites.append(domain)
-                  print(f"  ✅ Lấy {len(all_sites)} web từ Top 1M")
-          except Exception as e:
-              print(f"  ⚠️ Lỗi: {e}")
-          
-          # NGUỒN 2: Danh sách mẫu
-          default_sites = [
-              'google.com','facebook.com','youtube.com','twitter.com','instagram.com',
-              'linkedin.com','reddit.com','netflix.com','amazon.com','microsoft.com',
-              'apple.com','adobe.com','salesforce.com','oracle.com','ibm.com',
-              'bbc.com','guardian.co.uk','reuters.com','bloomberg.com','ft.com',
-              'alibaba.com','tencent.com','baidu.com','jd.com','naver.com',
-              'stripe.com','paypal.com','shopify.com','github.com','gitlab.com',
-              'vietnamnet.vn','zingnews.vn','tiki.vn','shopee.vn','fpt.vn',
-              'viettel.vn','thegioididong.com','vnexpress.net','dantri.com.vn',
-              'chinhphu.vn','mof.gov.vn','mic.gov.vn','moit.gov.vn'
-          ]
-          all_sites.extend(default_sites)
-          all_sites = list(set(all_sites))
-          print(f"📊 TỔNG WEB RAW: {len(all_sites)}")
-          
-          # PHÂN TÍCH ĐIỂM
-          scored = []
-          for site in all_sites:
-              if not site or len(site) < 4:
-                  continue
-              domain = site.lower()
-              score = 0
-              reasons = []
-              bounty = 0
-              
-              if any(kw in domain for kw in ['bank','finance','pay','payment']):
-                  score += 40; reasons.append("Tài chính"); bounty += 5000
-              if any(kw in domain for kw in ['crypto','bitcoin','eth','defi','blockchain']):
-                  score += 45; reasons.append("Crypto"); bounty += 10000
-              if any(kw in domain for kw in ['gov','government','state']):
-                  score += 35; reasons.append("Chính phủ"); bounty += 3000
-              if any(kw in domain for kw in ['edu','university','college']):
-                  score += 30; reasons.append("Giáo dục"); bounty += 2000
-              if any(kw in domain for kw in ['api','gateway','auth']):
-                  score += 25; reasons.append("API"); bounty += 1500
-              if any(kw in domain for kw in ['admin','login','security']):
-                  score += 20; reasons.append("Admin"); bounty += 1000
-              if any(kw in domain for kw in ['shop','store','cart']):
-                  score += 15; reasons.append("E-commerce"); bounty += 800
-              
-              if len(domain) < 10: score += 5
-              if domain.count('.') > 1: score += 8
-              if domain.endswith('.com'): score += 3
-              if domain.endswith('.gov') or domain.endswith('.edu'): score += 10
-              
-              score = score * 2
-              
-              if score > 10:
-                  scored.append({
-                      'domain': site,
-                      'url': f"https://{site}",
-                      'score': score,
-                      'reasons': reasons[:3],
-                      'bounty_estimate': bounty,
-                      'has_money': bounty > 500
-                  })
-          
-          print(f"📊 WEB CÓ ĐIỂM > 10: {len(scored)}")
-          
-          # CHỌN TOP
-          target_count = 200
-          scored.sort(key=lambda x: x['score'], reverse=True)
-          top_candidates = scored[:target_count * 2]
-          
-          # KIỂM TRA SỐNG
-          alive = []
-          for target in top_candidates:
-              if len(alive) >= target_count:
-                  break
-              url = target['url']
-              try:
-                  result = subprocess.run(
-                      ['curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', url],
-                      capture_output=True, text=True, timeout=5
-                  )
-                  code = result.stdout.strip()
-                  if code in ['200', '301', '302', '403', '401']:
-                      alive.append(target)
-                      print(f"  ✅ {url}")
-                  else:
-                      print(f"  ❌ {url}")
-              except:
-                  print(f"  ⚠️ {url}")
-          
-          print(f"📊 WEB CÒN SỐNG: {len(alive)}/{target_count}")
-          
-          # LƯU FILE
-          with open('targets.txt', 'w') as f:
-              for t in alive:
-                  f.write(f"{t['url']}\n")
-          
-          with open('targets_analysis.json', 'w') as f:
-              json.dump(alive, f, indent=2)
-          
-          print(f"✅ ĐÃ CHỌN {len(alive)} WEB")
-          EOF
+          # Tạo file Python bằng echo (KHÔNG HEREDOC)
+          echo 'import json, requests, subprocess, time, sys' > /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo 'print("🧠 CHỌN LỌC WEB THÔNG MINH")' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo 'all_sites = []' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo '# NGUỒN 1: Top 1M' >> /tmp/selector.py
+          echo 'print("📥 Đang tải Top 1M...")' >> /tmp/selector.py
+          echo 'try:' >> /tmp/selector.py
+          echo '    r = requests.get("https://raw.githubusercontent.com/mehulj94/top-1m/master/top-1m.txt", timeout=30)' >> /tmp/selector.py
+          echo '    if r.status_code == 200:' >> /tmp/selector.py
+          echo '        for line in r.text.splitlines()[:5000]:' >> /tmp/selector.py
+          echo '            domain = line.strip().lower()' >> /tmp/selector.py
+          echo '            if domain and "." in domain:' >> /tmp/selector.py
+          echo '                all_sites.append(domain)' >> /tmp/selector.py
+          echo '        print(f"  ✅ Lấy {len(all_sites)} web từ Top 1M")' >> /tmp/selector.py
+          echo 'except Exception as e:' >> /tmp/selector.py
+          echo '    print(f"  ⚠️ Lỗi: {e}")' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo '# NGUỒN 2: Danh sách mẫu' >> /tmp/selector.py
+          echo 'default_sites = [' >> /tmp/selector.py
+          echo '    "google.com","facebook.com","youtube.com","twitter.com","instagram.com",' >> /tmp/selector.py
+          echo '    "linkedin.com","reddit.com","netflix.com","amazon.com","microsoft.com",' >> /tmp/selector.py
+          echo '    "apple.com","adobe.com","salesforce.com","oracle.com","ibm.com",' >> /tmp/selector.py
+          echo '    "bbc.com","guardian.co.uk","reuters.com","bloomberg.com","ft.com",' >> /tmp/selector.py
+          echo '    "alibaba.com","tencent.com","baidu.com","jd.com","naver.com",' >> /tmp/selector.py
+          echo '    "stripe.com","paypal.com","shopify.com","github.com","gitlab.com",' >> /tmp/selector.py
+          echo '    "vietnamnet.vn","zingnews.vn","tiki.vn","shopee.vn","fpt.vn",' >> /tmp/selector.py
+          echo '    "viettel.vn","thegioididong.com","vnexpress.net","dantri.com.vn",' >> /tmp/selector.py
+          echo '    "chinhphu.vn","mof.gov.vn","mic.gov.vn","moit.gov.vn"' >> /tmp/selector.py
+          echo ']' >> /tmp/selector.py
+          echo 'all_sites.extend(default_sites)' >> /tmp/selector.py
+          echo 'all_sites = list(set(all_sites))' >> /tmp/selector.py
+          echo 'print(f"📊 TỔNG WEB RAW: {len(all_sites)}")' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo '# PHÂN TÍCH ĐIỂM' >> /tmp/selector.py
+          echo 'scored = []' >> /tmp/selector.py
+          echo 'for site in all_sites:' >> /tmp/selector.py
+          echo '    if not site or len(site) < 4:' >> /tmp/selector.py
+          echo '        continue' >> /tmp/selector.py
+          echo '    domain = site.lower()' >> /tmp/selector.py
+          echo '    score = 0' >> /tmp/selector.py
+          echo '    reasons = []' >> /tmp/selector.py
+          echo '    bounty = 0' >> /tmp/selector.py
+          echo '    if any(kw in domain for kw in ["bank","finance","pay","payment"]):' >> /tmp/selector.py
+          echo '        score += 40; reasons.append("Tài chính"); bounty += 5000' >> /tmp/selector.py
+          echo '    if any(kw in domain for kw in ["crypto","bitcoin","eth","defi","blockchain"]):' >> /tmp/selector.py
+          echo '        score += 45; reasons.append("Crypto"); bounty += 10000' >> /tmp/selector.py
+          echo '    if any(kw in domain for kw in ["gov","government","state"]):' >> /tmp/selector.py
+          echo '        score += 35; reasons.append("Chính phủ"); bounty += 3000' >> /tmp/selector.py
+          echo '    if any(kw in domain for kw in ["api","gateway","auth"]):' >> /tmp/selector.py
+          echo '        score += 25; reasons.append("API"); bounty += 1500' >> /tmp/selector.py
+          echo '    if any(kw in domain for kw in ["admin","login","security"]):' >> /tmp/selector.py
+          echo '        score += 20; reasons.append("Admin"); bounty += 1000' >> /tmp/selector.py
+          echo '    if any(kw in domain for kw in ["shop","store","cart"]):' >> /tmp/selector.py
+          echo '        score += 15; reasons.append("E-commerce"); bounty += 800' >> /tmp/selector.py
+          echo '    if len(domain) < 10: score += 5' >> /tmp/selector.py
+          echo '    if domain.count(".") > 1: score += 8' >> /tmp/selector.py
+          echo '    if domain.endswith(".com"): score += 3' >> /tmp/selector.py
+          echo '    if domain.endswith(".gov") or domain.endswith(".edu"): score += 10' >> /tmp/selector.py
+          echo '    score = score * 2' >> /tmp/selector.py
+          echo '    if score > 10:' >> /tmp/selector.py
+          echo '        scored.append({' >> /tmp/selector.py
+          echo '            "domain": site,' >> /tmp/selector.py
+          echo '            "url": f"https://{site}",' >> /tmp/selector.py
+          echo '            "score": score,' >> /tmp/selector.py
+          echo '            "reasons": reasons[:3],' >> /tmp/selector.py
+          echo '            "bounty_estimate": bounty,' >> /tmp/selector.py
+          echo '            "has_money": bounty > 500' >> /tmp/selector.py
+          echo '        })' >> /tmp/selector.py
+          echo 'print(f"📊 WEB CÓ ĐIỂM > 10: {len(scored)}")' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo '# CHỌN TOP' >> /tmp/selector.py
+          echo 'target_count = 200' >> /tmp/selector.py
+          echo 'scored.sort(key=lambda x: x["score"], reverse=True)' >> /tmp/selector.py
+          echo 'top_candidates = scored[:target_count * 2]' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo '# KIỂM TRA SỐNG' >> /tmp/selector.py
+          echo 'alive = []' >> /tmp/selector.py
+          echo 'for target in top_candidates:' >> /tmp/selector.py
+          echo '    if len(alive) >= target_count:' >> /tmp/selector.py
+          echo '        break' >> /tmp/selector.py
+          echo '    url = target["url"]' >> /tmp/selector.py
+          echo '    try:' >> /tmp/selector.py
+          echo '        result = subprocess.run([' >> /tmp/selector.py
+          echo '            "curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", url' >> /tmp/selector.py
+          echo '        ], capture_output=True, text=True, timeout=5)' >> /tmp/selector.py
+          echo '        code = result.stdout.strip()' >> /tmp/selector.py
+          echo '        if code in ["200", "301", "302", "403", "401"]:' >> /tmp/selector.py
+          echo '            alive.append(target)' >> /tmp/selector.py
+          echo '            print(f"  ✅ {url}")' >> /tmp/selector.py
+          echo '        else:' >> /tmp/selector.py
+          echo '            print(f"  ❌ {url}")' >> /tmp/selector.py
+          echo '    except:' >> /tmp/selector.py
+          echo '        print(f"  ⚠️ {url}")' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo 'print(f"📊 WEB CÒN SỐNG: {len(alive)}/{target_count}")' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo '# LƯU FILE' >> /tmp/selector.py
+          echo 'with open("targets.txt", "w") as f:' >> /tmp/selector.py
+          echo '    for t in alive:' >> /tmp/selector.py
+          echo '        f.write(f"{t["url"]}\n")' >> /tmp/selector.py
+          echo '' >> /tmp/selector.py
+          echo 'print(f"✅ ĐÃ CHỌN {len(alive)} WEB")' >> /tmp/selector.py
           
           python3 /tmp/selector.py
           
@@ -223,18 +207,16 @@ jobs:
           
           if [ "$TARGET_COUNT" -eq 0 ]; then
               echo "⚠️ KHÔNG TÌM THẤY WEB! DÙNG DANH SÁCH DỰ PHÒNG..."
-              cat > targets.txt << 'EOF'
-              https://google.com
-              https://facebook.com
-              https://twitter.com
-              https://linkedin.com
-              https://reddit.com
-              https://netflix.com
-              https://amazon.com
-              https://microsoft.com
-              https://apple.com
-              https://adobe.com
-              EOF
+              echo "https://google.com" > targets.txt
+              echo "https://facebook.com" >> targets.txt
+              echo "https://twitter.com" >> targets.txt
+              echo "https://linkedin.com" >> targets.txt
+              echo "https://reddit.com" >> targets.txt
+              echo "https://netflix.com" >> targets.txt
+              echo "https://amazon.com" >> targets.txt
+              echo "https://microsoft.com" >> targets.txt
+              echo "https://apple.com" >> targets.txt
+              echo "https://adobe.com" >> targets.txt
               TARGET_COUNT=$(wc -l < targets.txt)
               echo "target_count=$TARGET_COUNT" >> $GITHUB_ENV
           fi
@@ -246,7 +228,7 @@ jobs:
       - name: 🔍 GIAI ĐOẠN 2 - QUÉT LỖ HỔNG
         timeout-minutes: 45
         run: |
-          echo "🔍 GIAI ĐOẠN 2: QUÉT LỖ HỔNG TRÊN ${{ env.target_count }} WEB"
+          echo "🔍 GIAI ĐOẠN 2: QUÉT LỖ HỔNG"
           
           export PATH=$PATH:/usr/local/go/bin
           
@@ -258,17 +240,11 @@ jobs:
           MAX_REDIRECTS=15
           SEVERITY="critical,high,medium,low,info"
           
-          echo "⚙️ CONCURRENCY: $CONCURRENCY"
-          echo "⚙️ RATE_LIMIT: $RATE_LIMIT"
-          echo "🔥 BẮT ĐẦU QUÉT..."
-          
           nuclei -list targets.txt -severity "$SEVERITY" \
             -t ~/nuclei-templates/ \
             -t ~/nuclei-templates/official/ \
             -t ~/nuclei-templates/geeknik/ \
             -t ~/nuclei-templates/extra/ \
-            -t ~/nuclei-templates/random/ \
-            -t ~/nuclei-templates/zero/ \
             -c $CONCURRENCY -bulk-size $BULK_SIZE -rate-limit $RATE_LIMIT \
             -timeout $TIMEOUT -retries $RETRIES -max-redirects $MAX_REDIRECTS -follow-redirects \
             -stats -stats-interval 15 -rdb report.db -json-export results.json \
@@ -299,23 +275,21 @@ jobs:
           
           ESTIMATED_BOUNTY=$((CRITICAL * 5000 + HIGH * 1000 + MEDIUM * 200))
           
-          cat > FINAL_REPORT.txt << EOF
-          ╔══════════════════════════════════════════════════════════════════════════════╗
-          ║     🧠 CHIP V500.12 FIXED - BÁO CÁO                                       ║
-          ╚══════════════════════════════════════════════════════════════════════════════╝
-          
-          📅 $(date '+%Y-%m-%d %H:%M:%S')
-          🎯 SỐ WEB: $TARGET_COUNT
-          
-          📦 TỔNG LỖI: $TOTAL
-          🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi)
-          ⚡ HIGH: $HIGH          (💰 \$1,000+/lỗi)
-          🟡 MEDIUM: $MEDIUM      (💰 \$200+/lỗi)
-          
-          💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)
-          
-          ✅ BÁO CÁO HOÀN TẤT!
-          EOF
+          echo "═══════════════════════════════════════════════════════════════════════════════" > FINAL_REPORT.txt
+          echo "     🧠 CHIP V500.12 FINAL - BÁO CÁO" >> FINAL_REPORT.txt
+          echo "═══════════════════════════════════════════════════════════════════════════════" >> FINAL_REPORT.txt
+          echo "" >> FINAL_REPORT.txt
+          echo "📅 $(date '+%Y-%m-%d %H:%M:%S')" >> FINAL_REPORT.txt
+          echo "🎯 SỐ WEB: $TARGET_COUNT" >> FINAL_REPORT.txt
+          echo "" >> FINAL_REPORT.txt
+          echo "📦 TỔNG LỖI: $TOTAL" >> FINAL_REPORT.txt
+          echo "🔥 CRITICAL: $CRITICAL  (💰 \$5,000+/lỗi)" >> FINAL_REPORT.txt
+          echo "⚡ HIGH: $HIGH          (💰 \$1,000+/lỗi)" >> FINAL_REPORT.txt
+          echo "🟡 MEDIUM: $MEDIUM      (💰 \$200+/lỗi)" >> FINAL_REPORT.txt
+          echo "" >> FINAL_REPORT.txt
+          echo "💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)" >> FINAL_REPORT.txt
+          echo "" >> FINAL_REPORT.txt
+          echo "✅ BÁO CÁO HOÀN TẤT!" >> FINAL_REPORT.txt
           
           cat FINAL_REPORT.txt
 
@@ -329,7 +303,5 @@ jobs:
             results.json
             FINAL_REPORT.txt
             targets.txt
-            targets_analysis.json
             scan.log
-            ~/nuclei-templates/
           retention-days: 90
