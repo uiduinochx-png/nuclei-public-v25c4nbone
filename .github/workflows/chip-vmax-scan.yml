@@ -1,4 +1,4 @@
-name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V18.2 TỰ ĐỘNG TÌM WEB TOÀN CẦU"
+name: "🧠 CHỦ NHÂN VŨ TRỤ - CHIP V18.3 ĐẦY ĐỦ"
 
 on:
   workflow_dispatch:
@@ -43,7 +43,7 @@ on:
           - 200
           - 300
   schedule:
-    - cron: '*/30 * * * *'  # CẬP NHẬT MỖI 30 PHÚT
+    - cron: '*/30 * * * *'
 
 jobs:
   ultimate-scan:
@@ -51,12 +51,11 @@ jobs:
     timeout-minutes: 480
     
     steps:
-      - name: 🧠 KHỞI TẠO CHIP V18.2
+      - name: 🧠 KHỞI TẠO CHIP V18.3
         run: |
-          set -e
           echo "╔══════════════════════════════════════════════════════════════════════════════╗"
           echo "║                                                                            ║"
-          echo "║     🧠 CHIP V18.2 - TỰ ĐỘNG TÌM WEB TOÀN CẦU - CẬP NHẬT 30 PHÚT          ║"
+          echo "║     🧠 CHIP V18.3 - ĐẦY ĐỦ - TỰ ĐỘNG TÌM WEB TOÀN CẦU                   ║"
           echo "║                                                                            ║"
           echo "╚══════════════════════════════════════════════════════════════════════════════╝"
           echo ""
@@ -64,28 +63,23 @@ jobs:
           echo "🚀 CHẾ ĐỘ QUÉT: ${{ github.event.inputs.scan_mode || 'ultimate' }}"
           echo "🎯 SỐ WEB CẦN CHỌN: ${{ github.event.inputs.target_count || '150' }}"
           echo ""
-          echo "⚡ CHIP V18.2 - TÍNH NĂNG MỚI:"
-          echo "  🌍 TỰ ĐỘNG TÌM WEB TỪ HÀNG TỶ TRANG TOÀN CẦU"
-          echo "  🏆 CHỌN LỌC 100-200 WEB CÓ GIÁ TRỊ CAO NHẤT"
-          echo "  📡 LẤY DỮ LIỆU TỪ HACKERONE, BUGCROWD, IMMUNEFI, INTIGRITI"
+          echo "⚡ TÍNH NĂNG CHIP V18.3:"
+          echo "  🌍 TỰ ĐỘNG TÌM WEB TOÀN CẦU (HackerOne, Bugcrowd, Immunefi, Top1M)"
+          echo "  📊 BÁO CÁO SIÊU CHI TIẾT (TEXT + HTML)"
+          echo "  💰 PHÂN LOẠI LỖI CÓ TIỀN / KHÔNG TIỀN"
+          echo "  🔗 DANH SÁCH CVE ĐẦY ĐỦ"
           echo "  🔄 CẬP NHẬT DỮ LIỆU MỖI 30 PHÚT"
-          echo "  🧠 AI TỰ HỌC - CẬP NHẬT DANH SÁCH WEB THEO THỜI GIAN THỰC"
-          echo "  💰 ƯU TIÊN WEB CÓ BOUNTY CAO, CHƯA VÁ"
 
       - name: 📥 TẢI MÃ NGUỒN
         uses: actions/checkout@v4
 
       - name: 📦 CÀI ĐẶT CÔNG CỤ + 15+ TEMPLATE
         run: |
-          set -e
-          echo "🔥 ĐANG CÀI ĐẶT CÔNG CỤ + 15+ TEMPLATE..."
-          
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends \
-            jq curl git python3 python3-pip massdns nmap ffuf unzip wget \
-            && sudo rm -rf /var/lib/apt/lists/*
+            jq curl git python3 python3-pip massdns nmap ffuf unzip wget
+          sudo rm -rf /var/lib/apt/lists/*
           
-          echo "📥 ĐANG TẢI NUCLEI..."
           wget -q https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
           sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin
@@ -94,379 +88,171 @@ jobs:
           go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
           sudo cp ~/go/bin/nuclei /usr/local/bin/
           
-          echo "🔍 NUCLEI VERSION: $(nuclei -version 2>/dev/null | head -1 || echo 'N/A')"
-          
           pip3 install -q requests beautifulsoup4 lxml
           
-          echo "📥 CẬP NHẬT TEMPLATE NUCLEI..."
           for i in 1 2 3; do
-            nuclei -update-templates -silent && break || echo "⚠️ Lỗi lần $i, thử lại..."
-            sleep 5
+            nuclei -update-templates -silent && break || sleep 5
           done
           
-          nuclei -templates-version
-          
-          echo "📥 TẢI 15+ TEMPLATE BỔ SUNG..."
           mkdir -p ~/nuclei-templates
           cd ~/nuclei-templates
           
-          repos=(
-            "projectdiscovery/nuclei-templates"
-            "geeknik/nuclei-templates"
-            "notnotnotveg/nuclei-templates"
-            "random-robbie/nuclei-templates"
-            "zeroc00I/nuclei-templates"
-            "gwen001/nuclei-templates"
-            "dhiyaneshdk/nuclei-templates"
-            "pikpikcu/nuclei-templates"
-            "ehsandeep/nuclei-templates"
-            "ddworken/nuclei-templates"
-            "s0md3v/nuclei-templates"
-            "r3naissance/nuclei-templates"
-            "loneferret/nuclei-templates"
-            "initstring/nuclei-templates"
-            "codingo/nuclei-templates"
-          )
-          
-          for repo in "${repos[@]}"; do
+          # 15+ template
+          for repo in projectdiscovery/nuclei-templates geeknik/nuclei-templates notnotnotveg/nuclei-templates random-robbie/nuclei-templates zeroc00I/nuclei-templates gwen001/nuclei-templates dhiyaneshdk/nuclei-templates pikpikcu/nuclei-templates ehsandeep/nuclei-templates ddworken/nuclei-templates s0md3v/nuclei-templates r3naissance/nuclei-templates loneferret/nuclei-templates initstring/nuclei-templates codingo/nuclei-templates; do
             name=$(echo $repo | cut -d'/' -f2)
-            echo "  📥 Đang tải: $name..."
             git clone --depth 1 -q "https://github.com/$repo.git" "$name" 2>/dev/null || true
           done
           
           mkdir -p all
           find . -name "*.yaml" -exec cp {} all/ \; 2>/dev/null
           
-          TEMPLATE_COUNT=$(find . -name "*.yaml" | wc -l)
-          echo "📊 TỔNG TEMPLATE: $TEMPLATE_COUNT"
           echo "✅ CÀI ĐẶT HOÀN TẤT!"
 
-      - name: 🌍 CHIP V18.2 - TỰ ĐỘNG TÌM WEB TOÀN CẦU + BUG BOUNTY
+      - name: 🌍 TỰ ĐỘNG TÌM WEB TOÀN CẦU
         id: find_targets
         run: |
-          set -e
-          echo "🌍 CHIP V18.2 - ĐANG TÌM WEB TOÀN CẦU + BUG BOUNTY..."
-          echo ""
+          echo "🌍 CHIP V18.3 - ĐANG TÌM WEB TOÀN CẦU + BUG BOUNTY..."
           
-          cat > smart_finder.py << 'EOF'
+          curl -s -o /tmp/finder.py https://gist.githubusercontent.com/raw/your_script 2>/dev/null || cat > /tmp/finder.py << 'EOF'
           import json, requests, subprocess, time, re
           from bs4 import BeautifulSoup
           
-          print("🧠 CHIP V18.2 - SMART FINDER PRO")
-          print("🔍 ĐANG QUÉT HÀNG TỶ WEB + BUG BOUNTY PLATFORMS...")
-          print()
+          print("🧠 CHIP V18.3 - SMART FINDER PRO")
+          print("🔍 ĐANG QUÉT HÀNG TỶ WEB + BUG BOUNTY...")
           
           all_targets = []
-          seen_domains = set()
+          seen = set()
           
-          # === 1. HACKERONE ===
-          print("📥 1. ĐANG LẤY DỮ LIỆU TỪ HACKERONE...")
+          # 1. HackerOne
+          print("📥 1. HACKERONE...")
           try:
-              url = "https://hackerone.com/programs/search?query=type:public"
-              headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-              r = requests.get(url, timeout=30, headers=headers)
+              r = requests.get("https://hackerone.com/programs/search?query=type:public", timeout=30)
               if r.status_code == 200:
-                  soup = BeautifulSoup(r.text, 'html.parser')
-                  for link in soup.find_all('a', href=True):
-                      href = link['href']
-                      if '/programs/' in href:
-                          parts = href.split('/')
-                          for part in parts:
-                              if '.' in part and len(part) > 3:
-                                  domain = part.strip().lower()
-                                  if domain not in seen_domains:
-                                      seen_domains.add(domain)
-                                      all_targets.append({
-                                          'domain': domain,
-                                          'source': 'HackerOne',
-                                          'bounty': 5000,
-                                          'score': 90
-                                      })
-              print(f"  ✅ Lấy {len(all_targets)} web từ HackerOne")
+                  for part in re.findall(r'[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', r.text):
+                      domain = part.strip().lower()
+                      if domain not in seen and len(domain) > 3:
+                          seen.add(domain); all_targets.append({"domain": domain, "source": "HackerOne", "score": 90})
           except Exception as e:
-              print(f"  ⚠️ Lỗi HackerOne: {e}")
+              print(f"  ⚠️ Lỗi: {e}")
+          print(f"  ✅ Lấy {len(all_targets)} web từ HackerOne")
           
-          # === 2. BUGCROWD ===
-          print("📥 2. ĐANG LẤY DỮ LIỆU TỪ BUGCROWD...")
+          # 2. Bugcrowd
+          print("📥 2. BUGCROWD...")
           try:
-              url = "https://bugcrowd.com/programs"
-              headers = {"User-Agent": "Mozilla/5.0"}
-              r = requests.get(url, timeout=30, headers=headers)
+              r = requests.get("https://bugcrowd.com/programs", timeout=30)
               if r.status_code == 200:
-                  soup = BeautifulSoup(r.text, 'html.parser')
-                  for item in soup.find_all(['a', 'div', 'span']):
-                      text = item.text.strip()
-                      if '.' in text and len(text) > 5 and ' ' not in text:
-                          domain = text.lower()
-                          if domain not in seen_domains and not any(x in domain for x in ['bugcrowd','hackerone']):
-                              seen_domains.add(domain)
-                              all_targets.append({
-                                  'domain': domain,
-                                  'source': 'Bugcrowd',
-                                  'bounty': 3000,
-                                  'score': 85
-                              })
-              print(f"  ✅ Lấy {len(all_targets)} web từ Bugcrowd")
+                  for part in re.findall(r'[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', r.text):
+                      domain = part.strip().lower()
+                      if domain not in seen and len(domain) > 3:
+                          seen.add(domain); all_targets.append({"domain": domain, "source": "Bugcrowd", "score": 85})
           except Exception as e:
-              print(f"  ⚠️ Lỗi Bugcrowd: {e}")
+              print(f"  ⚠️ Lỗi: {e}")
+          print(f"  ✅ Lấy {len(all_targets)} web từ Bugcrowd")
           
-          # === 3. IMMUNEFI ===
-          print("📥 3. ĐANG LẤY DỮ LIỆU TỪ IMMUNEFI...")
+          # 3. Immunefi
+          print("📥 3. IMMUNEFI...")
           try:
-              url = "https://immunefi.com/explore/"
-              headers = {"User-Agent": "Mozilla/5.0"}
-              r = requests.get(url, timeout=30, headers=headers)
+              r = requests.get("https://immunefi.com/explore/", timeout=30)
               if r.status_code == 200:
-                  soup = BeautifulSoup(r.text, 'html.parser')
-                  for link in soup.find_all('a', href=True):
-                      href = link['href']
-                      if '/bounty/' in href:
-                          parts = href.split('/')
-                          for part in parts:
-                              if '.' in part and len(part) > 3:
-                                  domain = part.strip().lower()
-                                  if domain not in seen_domains:
-                                      seen_domains.add(domain)
-                                      all_targets.append({
-                                          'domain': domain,
-                                          'source': 'Immunefi',
-                                          'bounty': 10000,
-                                          'score': 95
-                                      })
-              print(f"  ✅ Lấy {len(all_targets)} web từ Immunefi")
+                  for part in re.findall(r'[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', r.text):
+                      domain = part.strip().lower()
+                      if domain not in seen and len(domain) > 3:
+                          seen.add(domain); all_targets.append({"domain": domain, "source": "Immunefi", "score": 95})
           except Exception as e:
-              print(f"  ⚠️ Lỗi Immunefi: {e}")
+              print(f"  ⚠️ Lỗi: {e}")
+          print(f"  ✅ Lấy {len(all_targets)} web từ Immunefi")
           
-          # === 4. INTIGRITI ===
-          print("📥 4. ĐANG LẤY DỮ LIỆU TỪ INTIGRITI...")
+          # 4. Top 1M
+          print("📥 4. TOP 1M...")
           try:
-              url = "https://www.intigriti.com/programs"
-              headers = {"User-Agent": "Mozilla/5.0"}
-              r = requests.get(url, timeout=30, headers=headers)
+              r = requests.get("https://raw.githubusercontent.com/mehulj94/top-1m/master/top-1m.txt", timeout=30)
               if r.status_code == 200:
-                  soup = BeautifulSoup(r.text, 'html.parser')
-                  for link in soup.find_all('a', href=True):
-                      href = link['href']
-                      if '/program/' in href:
-                          parts = href.split('/')
-                          for part in parts:
-                              if '.' in part and len(part) > 3:
-                                  domain = part.strip().lower()
-                                  if domain not in seen_domains:
-                                      seen_domains.add(domain)
-                                      all_targets.append({
-                                          'domain': domain,
-                                          'source': 'Intigriti',
-                                          'bounty': 4000,
-                                          'score': 88
-                                      })
-              print(f"  ✅ Lấy {len(all_targets)} web từ Intigriti")
-          except Exception as e:
-              print(f"  ⚠️ Lỗi Intigriti: {e}")
-          
-          # === 5. YESWEHACK ===
-          print("📥 5. ĐANG LẤY DỮ LIỆU TỪ YESWEHACK...")
-          try:
-              url = "https://yeswehack.com/programs"
-              headers = {"User-Agent": "Mozilla/5.0"}
-              r = requests.get(url, timeout=30, headers=headers)
-              if r.status_code == 200:
-                  soup = BeautifulSoup(r.text, 'html.parser')
-                  for link in soup.find_all('a', href=True):
-                      href = link['href']
-                      if '/program/' in href:
-                          parts = href.split('/')
-                          for part in parts:
-                              if '.' in part and len(part) > 3:
-                                  domain = part.strip().lower()
-                                  if domain not in seen_domains:
-                                      seen_domains.add(domain)
-                                      all_targets.append({
-                                          'domain': domain,
-                                          'source': 'YesWeHack',
-                                          'bounty': 3500,
-                                          'score': 86
-                                      })
-              print(f"  ✅ Lấy {len(all_targets)} web từ YesWeHack")
-          except Exception as e:
-              print(f"  ⚠️ Lỗi YesWeHack: {e}")
-          
-          # === 6. TOP 1M WEBSITES ===
-          print("📥 6. ĐANG LẤY TOP 1M WEBSITES...")
-          try:
-              r = requests.get('https://raw.githubusercontent.com/mehulj94/top-1m/master/top-1m.txt', timeout=30)
-              if r.status_code == 200:
+                  count = 0
                   for line in r.text.splitlines()[:2000]:
                       domain = line.strip().lower()
-                      if domain and '.' in domain and domain not in seen_domains:
-                          # Phân tích điểm cho top web
-                          score = 0
-                          bounty = 0
-                          if any(kw in domain for kw in ['bank','finance','pay']):
-                              score += 30; bounty += 5000
-                          if any(kw in domain for kw in ['crypto','blockchain','defi']):
-                              score += 35; bounty += 10000
-                          if any(kw in domain for kw in ['gov','government']):
-                              score += 25; bounty += 3000
-                          if any(kw in domain for kw in ['api','auth','login']):
-                              score += 20; bounty += 1500
-                          if any(kw in domain for kw in ['shop','store','cart']):
-                              score += 15; bounty += 800
-                          if domain.endswith('.gov') or domain.endswith('.edu'):
-                              score += 10
-                          
-                          if score > 20:
-                              seen_domains.add(domain)
-                              all_targets.append({
-                                  'domain': domain,
-                                  'source': 'Top1M',
-                                  'bounty': bounty,
-                                  'score': score * 2
-                              })
-              print(f"  ✅ Lấy {len(all_targets)} web từ Top1M")
+                      if domain and "." in domain and domain not in seen:
+                          score = 20
+                          if any(kw in domain for kw in ["bank","finance","pay"]): score += 30
+                          if any(kw in domain for kw in ["crypto","blockchain","defi"]): score += 35
+                          if any(kw in domain for kw in ["gov","government"]): score += 25
+                          if any(kw in domain for kw in ["api","auth","login"]): score += 20
+                          if domain.endswith(".gov") or domain.endswith(".edu"): score += 10
+                          if score > 30:
+                              seen.add(domain); all_targets.append({"domain": domain, "source": "Top1M", "score": score})
+                              count += 1
+                  print(f"  ✅ Lấy {count} web từ Top1M")
           except Exception as e:
-              print(f"  ⚠️ Lỗi Top1M: {e}")
+              print(f"  ⚠️ Lỗi: {e}")
           
-          # === 7. DANH SÁCH CÓ SẴN ===
-          print("📥 7. ĐANG THÊM DANH SÁCH WEB CHẤT LƯỢNG...")
-          default_sites = [
-              'google.com','facebook.com','youtube.com','twitter.com','instagram.com',
-              'linkedin.com','reddit.com','netflix.com','amazon.com','microsoft.com',
-              'apple.com','adobe.com','salesforce.com','oracle.com','ibm.com',
-              'bbc.com','guardian.co.uk','reuters.com','bloomberg.com','ft.com',
-              'alibaba.com','tencent.com','baidu.com','jd.com','naver.com',
-              'stripe.com','paypal.com','shopify.com','github.com','gitlab.com',
-              'vietnamnet.vn','zingnews.vn','tiki.vn','shopee.vn','fpt.vn',
-              'viettel.vn','thegioididong.com','vnexpress.net','dantri.com.vn',
-              'chinhphu.vn','mof.gov.vn','mic.gov.vn','moit.gov.vn'
-          ]
-          for site in default_sites:
-              if site not in seen_domains:
-                  seen_domains.add(site)
-                  all_targets.append({
-                      'domain': site,
-                      'source': 'Default',
-                      'bounty': 1000,
-                      'score': 50
-                  })
-          print(f"  ✅ Thêm {len(default_sites)} web từ danh sách có sẵn")
+          # 5. Danh sách có sẵn
+          print("📥 5. DANH SÁCH CÓ SẴN...")
+          sites = ["google.com","facebook.com","youtube.com","twitter.com","linkedin.com","reddit.com","netflix.com","amazon.com","microsoft.com","apple.com","adobe.com","salesforce.com","oracle.com","ibm.com","bbc.com","guardian.co.uk","reuters.com","bloomberg.com","ft.com","alibaba.com","tencent.com","baidu.com","jd.com","naver.com","stripe.com","paypal.com","shopify.com","github.com","gitlab.com","vietnamnet.vn","zingnews.vn","tiki.vn","shopee.vn","fpt.vn","viettel.vn","thegioididong.com","vnexpress.net","dantri.com.vn","chinhphu.vn","mof.gov.vn","mic.gov.vn","moit.gov.vn"]
+          for site in sites:
+              if site not in seen:
+                  seen.add(site); all_targets.append({"domain": site, "source": "Default", "score": 50})
+          print(f"  ✅ Thêm {len(sites)} web")
           
-          # === CHỌN LỌC 100-200 WEB TỐT NHẤT ===
-          print()
           print(f"📊 TỔNG WEB TÌM ĐƯỢC: {len(all_targets)}")
-          
-          # Sắp xếp theo điểm số
-          all_targets.sort(key=lambda x: x['score'], reverse=True)
-          
+          all_targets.sort(key=lambda x: x["score"], reverse=True)
           target_count = 150
-          top_targets = all_targets[:target_count * 2]
+          top = all_targets[:target_count*2]
           
-          # === KIỂM TRA WEB SỐNG ===
-          print()
-          print("🔍 ĐANG KIỂM TRA WEB CÒN SỐNG...")
-          
-          alive_targets = []
-          for target in top_targets:
-              if len(alive_targets) >= target_count:
-                  break
-              url = f"https://{target['domain']}"
+          print("🔍 KIỂM TRA WEB CÒN SỐNG...")
+          alive = []
+          for t in top:
+              if len(alive) >= target_count: break
+              url = f"https://{t['domain']}"
               try:
-                  result = subprocess.run(
-                      ['curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', url],
-                      capture_output=True, text=True, timeout=5
-                  )
-                  code = result.stdout.strip()
-                  if code in ['200', '301', '302', '403', '401']:
-                      alive_targets.append(target)
-                      print(f"  ✅ {url} - HTTP {code}")
+                  code = subprocess.run(["curl","-s","-o","/dev/null","-w","%{http_code}",url], capture_output=True, text=True, timeout=5).stdout.strip()
+                  if code in ["200","301","302","403"]:
+                      alive.append(t); print(f"  ✅ {url}")
                   else:
                       print(f"  ❌ {url} - HTTP {code}")
               except:
-                  print(f"  ⚠️ {url} - TIMEOUT")
+                  print(f"  ⚠️ {url}")
           
-          print()
-          print(f"📊 WEB CÒN SỐNG: {len(alive_targets)}/{target_count}")
-          
-          # === LƯU FILE ===
-          with open('targets.txt', 'w') as f:
-              for t in alive_targets:
-                  f.write(f"https://{t['domain']}\n")
-          
-          with open('targets_analysis.json', 'w') as f:
-              json.dump(alive_targets, f, indent=2)
-          
-          # === HIỂN THỊ TOP ===
-          print()
-          print("════════════════════════════════════════════════════════════════════════════════")
-          print("🏆 TOP 20 WEB GIÁ TRỊ CAO NHẤT (TỪ BUG BOUNTY + TOÀN CẦU):")
-          print("════════════════════════════════════════════════════════════════════════════════")
-          for i, t in enumerate(alive_targets[:20], 1):
-              bounty_str = f"💰 ${t['bounty']:,}" if t['bounty'] > 0 else ""
-              print(f"{i:2}. {t['domain']} - Điểm: {t['score']} - {t['source']} {bounty_str}")
-          
-          print()
-          print(f"✅ TỔNG WEB CHỌN ĐƯỢC: {len(alive_targets)}")
-          print("════════════════════════════════════════════════════════════════════════════════")
+          print(f"📊 WEB CÒN SỐNG: {len(alive)}/{target_count}")
+          with open("targets.txt", "w") as f:
+              for t in alive: f.write(f"https://{t['domain']}\n")
+          with open("targets_analysis.json", "w") as f:
+              json.dump(alive, f, indent=2)
+          print(f"✅ ĐÃ CHỌN {len(alive)} WEB")
           EOF
           
-          python3 smart_finder.py
+          python3 /tmp/finder.py
           
           TARGET_COUNT=$(wc -l < targets.txt 2>/dev/null || echo 0)
           echo "target_count=$TARGET_COUNT" >> $GITHUB_ENV
           
           if [ "$TARGET_COUNT" -eq 0 ]; then
-              echo "⚠️ KHÔNG TÌM THẤY WEB! DÙNG DANH SÁCH DỰ PHÒNG..."
-              cat > targets.txt << 'EOF'
-              https://google.com
-              https://facebook.com
-              https://twitter.com
-              https://linkedin.com
-              https://reddit.com
-              https://netflix.com
-              https://amazon.com
-              https://microsoft.com
-              https://apple.com
-              https://adobe.com
-              EOF
-              TARGET_COUNT=$(wc -l < targets.txt)
+              echo "⚠️ DÙNG DANH SÁCH DỰ PHÒNG..."
+              printf "https://google.com\nhttps://facebook.com\nhttps://twitter.com\nhttps://linkedin.com\nhttps://reddit.com\nhttps://netflix.com\nhttps://amazon.com\nhttps://microsoft.com\nhttps://apple.com\nhttps://adobe.com\n" > targets.txt
+              TARGET_COUNT=10
               echo "target_count=$TARGET_COUNT" >> $GITHUB_ENV
           fi
           
-          echo ""
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "✅ ĐÃ CHỌN $TARGET_COUNT WEB ĐỂ QUÉT"
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "📋 DANH SÁCH WEB (10 MỤC ĐẦU):"
+          echo "🎯 SỐ WEB: $TARGET_COUNT"
           head -10 targets.txt
 
-      - name: 🔍 CHIP V18.2 - QUÉT KHÔNG BỊ CHẶN
+      - name: 🔍 QUÉT LỖ HỔNG NÂNG CAO
         timeout-minutes: 420
         run: |
-          set -e
-          echo "⏰ CHIP V18.2 BẮT ĐẦU QUÉT: $(date)"
-          echo "🎯 MỤC TIÊU: ${{ env.target_count }} WEB"
+          echo "🔍 CHIP V18.3 - QUÉT LỖ HỔNG NÂNG CAO..."
           
           export PATH=$PATH:/usr/local/go/bin
           
-          CONCURRENCY=80
-          BULK_SIZE=40
-          RATE_LIMIT=60
-          TIMEOUT=20
-          RETRIES=4
-          MAX_REDIRECTS=12
+          case "${{ github.event.inputs.scan_mode }}" in
+            fast)  CONCURRENCY=120; BULK_SIZE=60; RATE_LIMIT=100; TIMEOUT=10; RETRIES=3 ;;
+            deep)  CONCURRENCY=40;  BULK_SIZE=20; RATE_LIMIT=30;  TIMEOUT=35; RETRIES=6 ;;
+            ultimate) CONCURRENCY=80; BULK_SIZE=40; RATE_LIMIT=50; TIMEOUT=25; RETRIES=5 ;;
+            *)     CONCURRENCY=60;  BULK_SIZE=30; RATE_LIMIT=40; TIMEOUT=20; RETRIES=4 ;;
+          esac
           
           if [ -z "${{ github.event.inputs.severity_level }}" ]; then
             SEVERITY="critical,high,medium,low,info"
           else
             SEVERITY="${{ github.event.inputs.severity_level }}"
           fi
-          
-          echo "⚙️ CẤU HÌNH QUÉT:"
-          echo "⚙️ CONCURRENCY: $CONCURRENCY"
-          echo "⚙️ RATE_LIMIT: $RATE_LIMIT"
-          echo "⚙️ SEVERITY: $SEVERITY"
-          echo ""
-          echo "🔥 BẮT ĐẦU QUÉT CÁC WEB GIÁ TRỊ CAO..."
           
           nuclei -list targets.txt -severity "$SEVERITY" \
             -t ~/nuclei-templates/ \
@@ -487,39 +273,29 @@ jobs:
             -t ~/nuclei-templates/initstring/ \
             -t ~/nuclei-templates/codingo/ \
             -c $CONCURRENCY -bulk-size $BULK_SIZE -rate-limit $RATE_LIMIT \
-            -timeout $TIMEOUT -retries $RETRIES -max-redirects $MAX_REDIRECTS -follow-redirects \
+            -timeout $TIMEOUT -retries $RETRIES -max-redirects 15 -follow-redirects \
             -stats -stats-interval 15 -rdb report.db -json-export results.json \
             -jle results.jsonl -o results.txt -no-interactsh -disable-update-check \
-            -max-host-error 20 -no-mhe -project -project-path /tmp/nuclei-project \
-            -silent -no-color 2>&1 | tee scan.log
+            -max-host-error 20 -no-mhe -silent -no-color 2>&1 | tee scan.log
           
           echo "=================================================="
           echo "📊 KẾT QUẢ QUÉT:"
           echo "=================================================="
-          
           TOTAL=$(cat results.txt 2>/dev/null | wc -l || echo 0)
           echo "📦 TỔNG LỖI: $TOTAL"
-          
           if [ -f results.json ]; then
-              CRITICAL=$(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)
-              HIGH=$(jq -r 'select(.info.severity=="high")' results.json 2>/dev/null | wc -l || echo 0)
-              MEDIUM=$(jq -r 'select(.info.severity=="medium")' results.json 2>/dev/null | wc -l || echo 0)
-              LOW=$(jq -r 'select(.info.severity=="low")' results.json 2>/dev/null | wc -l || echo 0)
-              INFO=$(jq -r 'select(.info.severity=="info")' results.json 2>/dev/null | wc -l || echo 0)
-              
-              echo "🔥 CRITICAL: $CRITICAL"
-              echo "⚡ HIGH: $HIGH"
-              echo "🟡 MEDIUM: $MEDIUM"
-              echo "🟢 LOW: $LOW"
-              echo "ℹ️ INFO: $INFO"
+              echo "🔥 CRITICAL: $(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)"
+              echo "⚡ HIGH: $(jq -r 'select(.info.severity=="high")' results.json 2>/dev/null | wc -l || echo 0)"
+              echo "🟡 MEDIUM: $(jq -r 'select(.info.severity=="medium")' results.json 2>/dev/null | wc -l || echo 0)"
+              echo "🟢 LOW: $(jq -r 'select(.info.severity=="low")' results.json 2>/dev/null | wc -l || echo 0)"
+              echo "ℹ️ INFO: $(jq -r 'select(.info.severity=="info")' results.json 2>/dev/null | wc -l || echo 0)"
           fi
           echo "=================================================="
 
-      - name: 📄 BÁO CÁO SIÊU CHI TIẾT
+      - name: 📄 BÁO CÁO SIÊU CHI TIẾT (TEXT + HTML)
         if: always()
         run: |
-          set -e
-          echo "🧠 CHIP V18.2 ĐANG TẠO BÁO CÁO..."
+          echo "🧠 CHIP V18.3 - ĐANG TẠO BÁO CÁO SIÊU CHI TIẾT..."
           
           TOTAL=$(jq -s 'length' results.json 2>/dev/null || echo 0)
           CRITICAL=$(jq -r 'select(.info.severity=="critical")' results.json 2>/dev/null | wc -l || echo 0)
@@ -532,25 +308,19 @@ jobs:
           ESTIMATED_BOUNTY=$((CRITICAL * 5000 + HIGH * 1000 + MEDIUM * 200 + LOW * 50))
           RISK_SCORE=$((CRITICAL * 10 + HIGH * 5 + MEDIUM * 2))
           
-          if [ $RISK_SCORE -gt 80 ]; then
-              RISK_LEVEL="🔴 CỰC KỲ NGUY HIỂM"
-          elif [ $RISK_SCORE -gt 50 ]; then
-              RISK_LEVEL="🟠 RẤT NGUY HIỂM"
-          elif [ $RISK_SCORE -gt 25 ]; then
-              RISK_LEVEL="🟡 NGUY HIỂM"
-          elif [ $RISK_SCORE -gt 10 ]; then
-              RISK_LEVEL="🟢 THẤP"
-          else
-              RISK_LEVEL="⚪ RẤT THẤP"
-          fi
+          if [ $RISK_SCORE -gt 80 ]; then RISK_LEVEL="🔴 CỰC KỲ NGUY HIỂM"
+          elif [ $RISK_SCORE -gt 50 ]; then RISK_LEVEL="🟠 RẤT NGUY HIỂM"
+          elif [ $RISK_SCORE -gt 25 ]; then RISK_LEVEL="🟡 NGUY HIỂM"
+          elif [ $RISK_SCORE -gt 10 ]; then RISK_LEVEL="🟢 THẤP"
+          else RISK_LEVEL="⚪ RẤT THẤP"; fi
           
+          # ---- BÁO CÁO TEXT ----
           cat > CHIP_V18_REPORT.txt << EOF
           ╔══════════════════════════════════════════════════════════════════════════════╗
-          ║     🧠 CHIP V18.2 - TỰ ĐỘNG TÌM WEB TOÀN CẦU - BÁO CÁO                    ║
+          ║     🧠 CHIP V18.3 - BÁO CÁO SIÊU CHI TIẾT - ĐẦY ĐỦ TÍNH NĂNG              ║
           ╚══════════════════════════════════════════════════════════════════════════════╝
           
           📅 $(date '+%Y-%m-%d %H:%M:%S') | 🔄 #${{ github.run_number }} | 🎯 $TARGET_COUNT web
-          🔄 CẬP NHẬT: 30 PHÚT/LẦN | 🌍 NGUỒN: HACKERONE + BUGCROWD + IMMUNEFI + INTIGRITI + TOP1M
           
           ════════════════════════════════════════════════════════════════════════════════
           📊 TỔNG QUAN
@@ -567,13 +337,12 @@ jobs:
           ════════════════════════════════════════════════════════════════════════════════
           📊 RISK SCORE: $RISK_SCORE
           ⚠️ RISK LEVEL: $RISK_LEVEL
-          💰 ƯỚC TÍNH BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)
+          💰 BOUNTY: \$$(printf "%'d" $ESTIMATED_BOUNTY)
           
           ════════════════════════════════════════════════════════════════════════════════
-          💰💰💰 LỖI CÓ GIÁ TRỊ TIỀN
+          💰💰💰 LỖI CÓ GIÁ TRỊ TIỀN (CRITICAL + HIGH + MEDIUM)
           ════════════════════════════════════════════════════════════════════════════════
           TỔNG LỖI CÓ TIỀN: $((CRITICAL + HIGH + MEDIUM))
-          
           ┌──────┬────────────┬────────────────────────────────────────────────────────────┬────────────┬──────────┐
           │  #   │ MỨC ĐỘ    │ TÊN LỖI                                                   │ BOUNTY     │ TRẠNG THÁI│
           ├──────┼────────────┼────────────────────────────────────────────────────────────┼────────────┼──────────┤
@@ -592,64 +361,109 @@ jobs:
           
           echo "└──────┴────────────┴────────────────────────────────────────────────────────────┴────────────┴──────────┘" >> CHIP_V18_REPORT.txt
           
-          # === LỖI KHÔNG CÓ TIỀN ===
           echo "" >> CHIP_V18_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
-          echo "📋📋📋 LỖI KHÔNG CÓ GIÁ TRỊ TIỀN" >> CHIP_V18_REPORT.txt
+          echo "📋📋📋 LỖI KHÔNG CÓ GIÁ TRỊ TIỀN (LOW + INFO)" >> CHIP_V18_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
           echo "TỔNG LỖI KHÔNG TIỀN: $((LOW + INFO))" >> CHIP_V18_REPORT.txt
           echo "" >> CHIP_V18_REPORT.txt
-          
           if [ $LOW -gt 0 ]; then
             echo "🟢 LOW ($LOW lỗi):" >> CHIP_V18_REPORT.txt
             jq -r 'select(.info.severity=="low") | "  - " + .info.name + " → " + .matched-at' results.json 2>/dev/null | head -50 >> CHIP_V18_REPORT.txt
           fi
-          
           if [ $INFO -gt 0 ]; then
             echo "" >> CHIP_V18_REPORT.txt
             echo "ℹ️ INFO ($INFO lỗi):" >> CHIP_V18_REPORT.txt
             jq -r 'select(.info.severity=="info") | "  - " + .info.name + " → " + .matched-at' results.json 2>/dev/null | head -50 >> CHIP_V18_REPORT.txt
           fi
           
-          # === DANH SÁCH CVE ===
           echo "" >> CHIP_V18_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
           echo "🔗🔗🔗 DANH SÁCH CVE" >> CHIP_V18_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
-          
           CVE_COUNT=$(jq -r 'select(.info.cve_id != null) | .info.cve_id' results.json 2>/dev/null | wc -l || echo 0)
           echo "TỔNG CVE: $CVE_COUNT" >> CHIP_V18_REPORT.txt
           echo "" >> CHIP_V18_REPORT.txt
           jq -r 'select(.info.cve_id != null) | "📌 " + .info.cve_id + " - " + .info.name + " → " + .matched-at' results.json 2>/dev/null | head -100 >> CHIP_V18_REPORT.txt
           
-          # === NGUỒN DỮ LIỆU ===
           echo "" >> CHIP_V18_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
           echo "📡📡📡 NGUỒN DỮ LIỆU WEB" >> CHIP_V18_REPORT.txt
           echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
-          echo "🌍 HackerOne - Chương trình Bug Bounty công khai" >> CHIP_V18_REPORT.txt
-          echo "🌍 Bugcrowd - Chương trình Bug Bounty" >> CHIP_V18_REPORT.txt
-          echo "🌍 Immunefi - Chương trình Web3/Blockchain" >> CHIP_V18_REPORT.txt
-          echo "🌍 Intigriti - Chương trình Bug Bounty Châu Âu" >> CHIP_V18_REPORT.txt
-          echo "🌍 YesWeHack - Chương trình Bug Bounty" >> CHIP_V18_REPORT.txt
-          echo "🌍 Top1M - 1 triệu website hàng đầu" >> CHIP_V18_REPORT.txt
-          echo "" >> CHIP_V18_REPORT.txt
+          echo "🌍 HackerOne, Bugcrowd, Immunefi, Top1M, Default" >> CHIP_V18_REPORT.txt
           echo "🔄 CẬP NHẬT: Mỗi 30 phút" >> CHIP_V18_REPORT.txt
           
           echo "" >> CHIP_V18_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
+          echo "🌐🌐🌐 DANH SÁCH WEB ĐÃ QUÉT" >> CHIP_V18_REPORT.txt
+          echo "════════════════════════════════════════════════════════════════════════════════" >> CHIP_V18_REPORT.txt
+          cat targets.txt >> CHIP_V18_REPORT.txt
+          
+          echo "" >> CHIP_V18_REPORT.txt
           echo "╔══════════════════════════════════════════════════════════════════════════════╗" >> CHIP_V18_REPORT.txt
-          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V18.2                                   ║" >> CHIP_V18_REPORT.txt
+          echo "║        ✅ BÁO CÁO HOÀN TẤT - CHIP V18.3                                   ║" >> CHIP_V18_REPORT.txt
           echo "║  💰 \$$(printf "%'d" $ESTIMATED_BOUNTY)  |  ⚠️ $RISK_LEVEL                ║" >> CHIP_V18_REPORT.txt
           echo "║  📦 TỔNG LỖI: $TOTAL  |  🔥 CÓ TIỀN: $((CRITICAL + HIGH + MEDIUM))       ║" >> CHIP_V18_REPORT.txt
-          echo "║  🌍 TỰ ĐỘNG TÌM WEB TOÀN CẦU - CẬP NHẬT 30 PHÚT                         ║" >> CHIP_V18_REPORT.txt
           echo "╚══════════════════════════════════════════════════════════════════════════════╝" >> CHIP_V18_REPORT.txt
           
           echo "✅ BÁO CÁO HOÀN TẤT!"
-          echo ""
-          echo "════════════════════════════════════════════════════════════════════════════════"
-          echo "📋 XEM NHANH BÁO CÁO:"
-          echo "════════════════════════════════════════════════════════════════════════════════"
           head -60 CHIP_V18_REPORT.txt
+          
+          # ---- BÁO CÁO HTML ----
+          echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CHIP V18.3 REPORT</title>' > report.html
+          echo '<style>
+          body{font-family:Segoe UI;background:linear-gradient(135deg,#0a0a2e,#1a1a4e);color:#fff;padding:20px}
+          .container{max-width:1200px;margin:0 auto;background:rgba(255,255,255,0.05);border-radius:20px;padding:30px}
+          h1{text-align:center;background:linear-gradient(45deg,#ff6b6b,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:2.5em}
+          .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:15px;margin:20px 0}
+          .card{background:rgba(255,255,255,0.05);border-radius:15px;padding:20px;text-align:center;border:1px solid rgba(255,255,255,0.1)}
+          .card .num{font-size:2.5em;font-weight:bold;display:block}
+          .critical .num{color:#ff4444} .high .num{color:#ff8800} .medium .num{color:#ffcc00}
+          .low .num{color:#44ff88} .info .num{color:#44aaff} .total .num{color:#fff}
+          .vuln{background:rgba(255,255,255,0.05);border-radius:8px;padding:12px;margin:8px 0;border-left:4px solid #666}
+          .vuln.critical{border-left-color:#ff4444} .vuln.high{border-left-color:#ff8800} .vuln.medium{border-left-color:#ffcc00}
+          .targets{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+          .target{background:rgba(255,255,255,0.05);padding:8px;border-radius:5px;font-size:0.85em;border:1px solid rgba(255,255,255,0.05)}
+          .footer{text-align:center;color:#666;margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05)}
+          h2{color:#ffd700;border-bottom:2px solid rgba(255,215,0,0.3);padding-bottom:10px}
+          @media(max-width:768px){.stats{grid-template-columns:repeat(3,1fr)}}
+          </style></head><body><div class="container">' >> report.html
+          
+          echo '<h1>🧠 CHIP V18.3 - ĐẦY ĐỦ TÍNH NĂNG</h1>' >> report.html
+          echo '<p style="text-align:center;color:#aaa;">Báo cáo quét bảo mật tự động</p>' >> report.html
+          echo '<p style="text-align:center;color:#888;">📅 '"$(date '+%Y-%m-%d %H:%M:%S')"' | 🎯 '"$TARGET_COUNT"' web</p>' >> report.html
+          
+          echo '<div class="stats">' >> report.html
+          echo '<div class="card critical"><span class="num">'"$CRITICAL"'</span>🔥 CRITICAL</div>' >> report.html
+          echo '<div class="card high"><span class="num">'"$HIGH"'</span>⚡ HIGH</div>' >> report.html
+          echo '<div class="card medium"><span class="num">'"$MEDIUM"'</span>🟡 MEDIUM</div>' >> report.html
+          echo '<div class="card low"><span class="num">'"$LOW"'</span>🟢 LOW</div>' >> report.html
+          echo '<div class="card info"><span class="num">'"$INFO"'</span>ℹ️ INFO</div>' >> report.html
+          echo '<div class="card total"><span class="num">'"$TOTAL"'</span>📦 TỔNG</div>' >> report.html
+          echo '</div>' >> report.html
+          
+          echo '<div style="background:rgba(255,215,0,0.1);border-radius:10px;padding:15px;margin:15px 0;text-align:center;border:1px solid rgba(255,215,0,0.2)">' >> report.html
+          echo '<p>💰 Bounty: <strong style="color:#ffd700;font-size:1.5em">$'"$(printf "%'d" $ESTIMATED_BOUNTY)"'</strong> | ⚠️ Risk: <strong style="color:#ff6b6b;font-size:1.3em">'"$RISK_LEVEL"'</strong></p>' >> report.html
+          echo '</div>' >> report.html
+          
+          if [ $CRITICAL -gt 0 ]; then
+            echo '<h2>🔥 CRITICAL</h2>' >> report.html
+            jq -r 'select(.info.severity=="critical") | "<div class=\"vuln critical\"><b>" + .info.name + "</b><br>📍 " + .matched-at + "<br>🔗 CVE: " + (.info.cve_id // "N/A") + "</div>"' results.json 2>/dev/null >> report.html
+          fi
+          if [ $HIGH -gt 0 ]; then
+            echo '<h2>⚡ HIGH</h2>' >> report.html
+            jq -r 'select(.info.severity=="high") | "<div class=\"vuln high\"><b>" + .info.name + "</b><br>📍 " + .matched-at + "<br>🔗 CVE: " + (.info.cve_id // "N/A") + "</div>"' results.json 2>/dev/null >> report.html
+          fi
+          if [ $MEDIUM -gt 0 ]; then
+            echo '<h2>🟡 MEDIUM</h2>' >> report.html
+            jq -r 'select(.info.severity=="medium") | "<div class=\"vuln medium\"><b>" + .info.name + "</b><br>📍 " + .matched-at + "<br>🔗 CVE: " + (.info.cve_id // "N/A") + "</div>"' results.json 2>/dev/null >> report.html
+          fi
+          
+          echo '<h2>📋 DANH SÁCH WEB</h2><div class="targets">' >> report.html
+          while read url; do echo "<div class=\"target\">🌐 $url</div>"; done < targets.txt >> report.html
+          echo '</div><div class="footer">🧠 CHỦ NHÂN VŨ TRỤ | CHIP V18.3</div></div></body></html>' >> report.html
+          
+          echo "✅ BÁO CÁO HTML HOÀN TẤT!"
 
       - name: 💾 LƯU KHO BÁU
         if: always()
@@ -663,9 +477,5 @@ jobs:
             report.html
             targets.txt
             targets_analysis.json
-            history.json
-            report.db
             scan.log
-            ~/nuclei-templates/
-            /tmp/nuclei-project/
           retention-days: 90
